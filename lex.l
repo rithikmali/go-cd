@@ -9,6 +9,7 @@ multi_comment "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/"
 letter [a-zA-Z_]
 digit [0-9]
 operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
+predeclared_functions append|cap|close|complex|copy|delete|imag|len|make|new|panic|print|println|real|recover
 
 %%
 {single_comment} ;
@@ -26,6 +27,7 @@ operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
 "%="    return MOD_ASSIGN;
 "++"    return INC_ASSIGN;
 "--"    return DEC_ASSIGN;
+"&^="   return AMPXOR_ASSIGN;
 
 ":="    return SHORT_DECLARATION;
 
@@ -35,6 +37,7 @@ operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
 "!="    return REL_NEQUAL;
 ">="    return REL_GEQ;
 "<="    return REL_LEQ;
+"&^"    return AMPXOR;
 "<<"    return LSHIFT;
 ">>"    return RSHIFT;
 "<-"    return CHANNEL_ASSIGN;
@@ -66,10 +69,12 @@ operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
 "for"           return KEYWORD_FOR;
 "return"        return KEYWORD_RETURN;
 "if"            return KEYWORD_IF;
-
+"nil"           return P_NIL;
+["true""false"] return P_BOOL;
 {operators}     return yytext[0];
-{letter}[{letter}{digit}]* return yytext;
-"\".*\"" | "`[.\n]*`"   return STRING;
+{letter}({letter}{digit})* {yyval.IDENTIFIER = yytext; return IDENTIFIER;}
+"\".*\"" | "`[.\n]*`"   return STRING_LITERAL;
+{predeclared_functions} return P_FUNCTION;
 
 
 
