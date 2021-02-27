@@ -10,6 +10,7 @@ letter [a-zA-Z_]
 digit [0-9]
 operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
 predeclared_functions append|cap|close|complex|copy|delete|imag|len|make|new|panic|print|println|real|recover
+predeclared_type bool|byte|complex64|complex128|error|float32|float64|int|int8|int16|int32|int64|rune|string|uint|uint8|uint16|uint32|uint64|uintptr
 
 %%
 {single_comment} ;
@@ -75,6 +76,7 @@ predeclared_functions append|cap|close|complex|copy|delete|imag|len|make|new|pan
 {letter}({letter}{digit})* {yyval.IDENTIFIER = yytext; return IDENTIFIER;}
 "\".*\"" | "`[.\n]*`"   return STRING_LITERAL;
 {predeclared_functions} return P_FUNCTION;
+{predeclared_type} {yylval.P_TYPE = strdup(yytext); return P_TYPE;}
 
 
 

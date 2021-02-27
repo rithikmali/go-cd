@@ -1,4 +1,33 @@
-%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN LSHIFT_ASSIGN RSHIFT_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN INC_ASSIGN DEC_ASSIGN AMPXOR_ASSIGN SHORT_DECLARATION LOGICAL_AND LOGICAL_OR REL_EQUAL REL_NEQUAL REL_GEQ REL_LEQ AMPXOR LSHIFT RSHIFT CHANNEL_ASSIGN REL_GT REL_LT KEYWORD_DEFAULT KEYWORD_BREAK KEYWORD_CHAN KEYWORD_SELECT KEYWORD_FUNC KEYWORD_MAP KEYWORD_INTERFACE KEYWORD_GO KEYWORD_FALLTHROUGH KEYWORD_ELSE KEYWORD_DEFER KEYWORD_GOTO KEYWORD_CONST KEYWORD_STRUCT KEYWORD_CASE KEYWORD_PACKAGE KEYWORD_CONTINUE KEYWORD_SWITCH KEYWORD_TYPE KEYWORD_IMPORT KEYWORD_RANGE KEYWORD_VAR KEYWORD_FOR KEYWORD_RETURN KEYWORD_IF P_NIL P_BOOL IDENTIFIER STRING_LITERAL P_FUNCTION
+%{
+    #include <stdio.h>
+    #include <stdlib.h>
+%}
+
+%define api.value.type union
+%define parse.error verbose
+
+%start SourceFile
+%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN LSHIFT_ASSIGN RSHIFT_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN INC_ASSIGN DEC_ASSIGN AMPXOR_ASSIGN SHORT_DECLARATION LOGICAL_AND LOGICAL_OR REL_EQUAL REL_NEQUAL REL_GEQ REL_LEQ AMPXOR LSHIFT RSHIFT CHANNEL_ASSIGN REL_GT REL_LT KEYWORD_DEFAULT KEYWORD_BREAK KEYWORD_CHAN KEYWORD_SELECT KEYWORD_FUNC KEYWORD_MAP KEYWORD_INTERFACE KEYWORD_GO KEYWORD_FALLTHROUGH KEYWORD_ELSE KEYWORD_DEFER KEYWORD_GOTO KEYWORD_CONST KEYWORD_STRUCT KEYWORD_CASE KEYWORD_PACKAGE KEYWORD_CONTINUE KEYWORD_SWITCH KEYWORD_TYPE KEYWORD_IMPORT KEYWORD_RANGE KEYWORD_VAR KEYWORD_FOR KEYWORD_RETURN KEYWORD_IF P_NIL P_BOOL IDENTIFIER STRING_LITERAL P_FUNCTION P_TYPE
+
+// %prec EMPTY
+// %prec NORMAL
+
+%left LOGICAL_OR
+%left LOGICAL_AND
+%left REL_EQUAL REL_NEQUAL REL_LT REL_LEQ REL_GT REL_GEQ 
+%left '+' '-' '|' '^'
+%left '*' '/' '%' LSHIFT RSHIFT '&' AMPXOR
+%nonassoc CHANNEL_ASSIGN
+%right P_UNARY
+
+%left   NotPackage
+%left   KEYWOED_PACKAGE
+
+%left   NotParen
+%left   '('
+
+%left   ')'
+%left   PreferToRightParen
 
 %%
 
@@ -72,6 +101,25 @@ UnaryExpression:
     | PrimaryExpression
 ;
 
+/*
+PrimaryExpr =
+	Operand |
+	Conversion |
+	MethodExpr |
+	PrimaryExpr Selector |
+	PrimaryExpr Index |
+	PrimaryExpr Slice |
+	PrimaryExpr TypeAssertion |
+	PrimaryExpr Arguments .
+
+Selector       = "." identifier .
+Index          = "[" Expression "]" .
+Slice          = "[" [ Expression ] ":" [ Expression ] "]" |
+                 "[" [ Expression ] ":" Expression ":" Expression "]" .
+TypeAssertion  = "." "(" Type ")" .
+Arguments      = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" 
+*/
+
 PrimaryExpression:
     Operand
     | PrimaryExpression Index
@@ -96,7 +144,6 @@ Literal:
 BasicLiteral:
     INT_LITERAL
     | FLOAT_LITERAL
-    | RUNE_LITERAL
     | STRING_LITERAL
 ;
 
@@ -120,6 +167,7 @@ Statement:
     SimpleStatement
     | Declaration
     | ForStatement
+    | SwitchStatement
 ;
 
 SimpleStatement:
@@ -178,7 +226,7 @@ ImportSpecificationList:
 ;
 
 ImportSpecificationList2:
-    ImportSpecification ImportSpecifImportSpecificationList2 %prec NORMAL
+    ImportSpecification ImportSpecificationList2 %prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -198,7 +246,9 @@ TypeName:
     | QualifiedID
 ;
 
-
+QualifiedID:
+    PackageName '.' IDENTIFIER
+;
 TopLevelDeclarations:
     TopLevelDeclaration TopLevelDeclarations %prec NORMAL
     | %empty %prec EMPTY
@@ -249,6 +299,11 @@ TypeSpecifications:
 TypeSpecificationList:
     TypeSpecification TypeSpecificationList %prec NORMAL
     | %empty %prec EMPTY
+;
+
+TypeSpecification:
+    AliasDeclaration 
+    | TypeDefinition
 ;
 
 AliasDeclaration: 
@@ -317,7 +372,7 @@ ForClauseInit:
 ;
 
 ForClauseCondition:
-    Condition
+    Expression
 ;
 
 ForClauseUpdation:
@@ -346,16 +401,40 @@ PreForRange:
 ;
 
 /* Switch */
+SwitchStatement: 
+    ExpressionSwitchStatement 
+    | TypeSwitchStatement
+;
 
-ExpressionSwitchStmt:
-    KEYWORD_SWITCH SimpleStatement ";" Expression "{" ExpressionCaseClause "}"
+ExpressionSwitchStatement:
+    KEYWORD_SWITCH SimpleStatement ';' Expression '{' ExpressionCaseClause '}'
 ;
 
 ExpressionCaseClause:
-    ExpressionSwitchCase ":" StatementList
+    ExpressionSwitchCase ':' Statements
 ;
 
 ExpressionSwitchCase:
     KEYWORD_CASE ExpressionList 
     | KEYWORD_DEFAULT
+;
+
+TypeSwitchStatement:
+    KEYWORD_SWITCH SimpleStatement ';' TypeSwitchGuard '{' TypeCaseClause '}' 
+;
+
+TypeSwitchGuard: 
+    IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+;
+
+TypeCaseClause:
+    TypeSwitchCase ':' Statements
+;
+
+TypeSwitchCase:
+     KEYWORD_CASE TypeList | KEYWORD_DEFAULT 
+;
+
+TypeList:
+     Type ',' Type 
 ;
