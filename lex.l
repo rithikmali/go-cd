@@ -1,21 +1,55 @@
 %{
 	#include<stdio.h>
-    #include "cdgolanghead.h"
-    
-%}
+    #include <string.h>
+    #include "y.tab.h"
+    void yyerror (char *s);
+    int yylex();
 
+%}
+%option yylineno
 single_comment \/\/.* 
 multi_comment "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/"  
 letter [a-zA-Z_]
 digit [0-9]
+decimal_digit [0-9]
 operators [+&()\-|\[\]\^:\.{}\/\*=,;%!]
 predeclared_functions append|cap|close|complex|copy|delete|imag|len|make|new|panic|print|println|real|recover
 predeclared_type bool|byte|complex64|complex128|error|float32|float64|int|int8|int16|int32|int64|rune|string|uint|uint8|uint16|uint32|uint64|uintptr
+whitespace     [[:space:]]+
 
+/* Digits */
+decimal_digits {decimal_digit}(_?{decimal_digit})*
+binary_digit   0|1
+binary_digits  {binary_digit}(_?{binary_digit})*
+octal_digit    [0-7]
+octal_digits   {octal_digit}(_?{octal_digit})*
+hex_digit      [0-9]|[A-F]|[a-f]
+hex_digits     {hex_digit}(_?{hex_digit})*
+
+/* Integer literals */
+int_lit     {decimal_lit}|{binary_lit}|{octal_lit}|{hex_lit}
+decimal_lit 0|([1-9](_?{decimal_digits})?)
+octal_lit   0[oO]_?{octal_digits}
+hex_lit     0[xX]_?{hex_digits}
+binary_lit  0[bB]_?{binary_digits}
+
+/* Float literals */
+float_lit         {decimal_float_lit}|{hex_float_lit}
+decimal_float_lit ({decimal_digits}"."{decimal_digits}?{decimal_exponent}?)|{decimal_digits}{decimal_exponent}
+decimal_exponent  [eE][+-]?{decimal_digits}
+hex_float_lit     0[xX]{hex_mantissa}{hex_exponent}
+hex_mantissa      (_?{hex_digits}"."{hex_digits}?)|(_?{hex_digits})|("."{hex_digits})
+hex_exponent      [pP][+-]?{decimal_digits}
+
+tab_newline [ \t\n] 
+string_lit \".*?\"
+identifier {letter}({letter}|{digit})*
 %%
-{single_comment} ;
-{multi_comment} ;
 
+{tab_newline} ;
+{single_comment} {printf("removed cmt\n");}
+{multi_comment} ;
+{whitespace} ;
 "+="    return ADD_ASSIGN;
 "-="    return SUB_ASSIGN;
 "*="    return MUL_ASSIGN;
@@ -26,9 +60,9 @@ predeclared_type bool|byte|complex64|complex128|error|float32|float64|int|int8|i
 "|="    return OR_ASSIGN;
 "^="    return XOR_ASSIGN;
 "%="    return MOD_ASSIGN;
+"&^="   return AMPXOR_ASSIGN;
 "++"    return INC_ASSIGN;
 "--"    return DEC_ASSIGN;
-"&^="   return AMPXOR_ASSIGN;
 
 ":="    return SHORT_DECLARATION;
 
@@ -60,7 +94,7 @@ predeclared_type bool|byte|complex64|complex128|error|float32|float64|int|int8|i
 "const"         return KEYWORD_CONST;
 "struct"        return KEYWORD_STRUCT;
 "case"          return KEYWORD_CASE;
-"package"       return KEYWORD_PACKAGE;
+"package"       {printf("found package\n");return KEYWORD_PACKAGE;}
 "continue"      return KEYWORD_CONTINUE;
 "switch"        return KEYWORD_SWITCH;
 "type"          return KEYWORD_TYPE;
@@ -70,20 +104,16 @@ predeclared_type bool|byte|complex64|complex128|error|float32|float64|int|int8|i
 "for"           return KEYWORD_FOR;
 "return"        return KEYWORD_RETURN;
 "if"            return KEYWORD_IF;
+"main"          return KEYWORD_MAIN;
 "nil"           return P_NIL;
-["true""false"] return P_BOOL;
+"true"|"false" return P_BOOL;
 {operators}     return yytext[0];
-{letter}({letter}{digit})* {yyval.IDENTIFIER = yytext; return IDENTIFIER;}
-"\".*\"" | "`[.\n]*`"   return STRING_LITERAL;
-{predeclared_functions} return P_FUNCTION;
-{predeclared_type} {yylval.P_TYPE = strdup(yytext); return P_TYPE;}
+{identifier} {printf("%s\n",yytext);yylval.id = yytext; return IDENTIFIER;}
+{string_lit}  {printf("%s\n",yytext);yylval.str = yytext; return STRING_LITERAL;
+{predeclared_functions} {yylval.id = yytext; return P_FUNCTION;}
+{predeclared_type} {yylval.id = yytext; return P_TYPE;}
+{int_lit} {yylval.num = atoi(yytext); return INT_LITERAL;}
+{float_lit} {yylval.f = atof(yytext); return FLOAT_LITERAL;}
+. {printf("unexpected character %s",yytext);}
 
-
-
-
-. printf("unexpected character",yytext);
 %%
-int yywrap(void)
-{
-    return 1;
-}

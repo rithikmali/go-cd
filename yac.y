@@ -1,16 +1,15 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #define YYSTYPE char*
 %}
 
-%define api.value.type union
-%define parse.error verbose
-
 %start SourceFile
-%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN LSHIFT_ASSIGN RSHIFT_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN INC_ASSIGN DEC_ASSIGN AMPXOR_ASSIGN SHORT_DECLARATION LOGICAL_AND LOGICAL_OR REL_EQUAL REL_NEQUAL REL_GEQ REL_LEQ AMPXOR LSHIFT RSHIFT CHANNEL_ASSIGN REL_GT REL_LT KEYWORD_DEFAULT KEYWORD_BREAK KEYWORD_CHAN KEYWORD_SELECT KEYWORD_FUNC KEYWORD_MAP KEYWORD_INTERFACE KEYWORD_GO KEYWORD_FALLTHROUGH KEYWORD_ELSE KEYWORD_DEFER KEYWORD_GOTO KEYWORD_CONST KEYWORD_STRUCT KEYWORD_CASE KEYWORD_PACKAGE KEYWORD_CONTINUE KEYWORD_SWITCH KEYWORD_TYPE KEYWORD_IMPORT KEYWORD_RANGE KEYWORD_VAR KEYWORD_FOR KEYWORD_RETURN KEYWORD_IF P_NIL P_BOOL IDENTIFIER STRING_LITERAL P_FUNCTION P_TYPE
+%token ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN LSHIFT_ASSIGN RSHIFT_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN MOD_ASSIGN INC_ASSIGN DEC_ASSIGN AMPXOR_ASSIGN SHORT_DECLARATION LOGICAL_AND LOGICAL_OR REL_EQUAL REL_NEQUAL REL_GEQ REL_LEQ AMPXOR LSHIFT RSHIFT CHANNEL_ASSIGN REL_GT REL_LT KEYWORD_DEFAULT KEYWORD_BREAK KEYWORD_CHAN KEYWORD_SELECT KEYWORD_FUNC KEYWORD_MAP KEYWORD_INTERFACE KEYWORD_GO KEYWORD_FALLTHROUGH KEYWORD_ELSE KEYWORD_DEFER KEYWORD_GOTO KEYWORD_CONST KEYWORD_STRUCT KEYWORD_CASE KEYWORD_PACKAGE KEYWORD_CONTINUE KEYWORD_SWITCH KEYWORD_TYPE KEYWORD_IMPORT KEYWORD_RANGE KEYWORD_VAR KEYWORD_FOR KEYWORD_RETURN KEYWORD_IF KEYWORD_MAIN P_NIL
 
-// %prec EMPTY
-// %prec NORMAL
+%precedence EMPTY
+%precedence NORMAL
+%token IDENTIFIER FLOAT_LITERAL STRING_LITERAL P_TYPE P_BOOL P_FUNCTION INT_LITERAL
 
 %left LOGICAL_OR
 %left LOGICAL_AND
@@ -21,7 +20,7 @@
 %right P_UNARY
 
 %left   NotPackage
-%left   KEYWOED_PACKAGE
+%left   KEYWORD_PACKAGE
 
 %left   NotParen
 %left   '('
@@ -159,7 +158,7 @@ CodeBlock:
 ;
 
 Statements:
-    Statements Statement %prec NORMAL
+    Statements Statement //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -203,16 +202,16 @@ SourceFile:
 ;
 
 PackageClause:
-    KEYWORD_PACKAGE PackageName
+    KEYWORD_PACKAGE PackageName 
 ;
 
 PackageName:
-	IDENTIFIER
+	IDENTIFIER {printf("got id\n");}
 ;
 
 /*Import*/
 ImportDeclarations:
-    ImportDeclaration ImportDeclarations %prec NORMAL
+    ImportDeclaration ImportDeclarations //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -226,7 +225,7 @@ ImportSpecificationList:
 ;
 
 ImportSpecificationList2:
-    ImportSpecification ImportSpecificationList2 %prec NORMAL
+    ImportSpecification ImportSpecificationList2 //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -250,12 +249,13 @@ QualifiedID:
     PackageName '.' IDENTIFIER
 ;
 TopLevelDeclarations:
-    TopLevelDeclaration TopLevelDeclarations %prec NORMAL
+    TopLevelDeclaration TopLevelDeclarations //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
 TopLevelDeclaration:
     Declaration
+    | KEYWORD_FUNC KEYWORD_MAIN '(' ')' CodeBlock
 ;
 /* Declerations */
 Declaration:
@@ -283,7 +283,7 @@ ConstIdList:
 ;
 
 PreConstIdList:
-    Type %prec NORMAL
+    Type //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -297,7 +297,7 @@ TypeSpecifications:
 ;
 
 TypeSpecificationList:
-    TypeSpecification TypeSpecificationList %prec NORMAL
+    TypeSpecification TypeSpecificationList //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -333,7 +333,7 @@ VariableIdList:
 ;
 
 VariableIdListType:
-    '=' ExpressionList %prec NORMAL
+    '=' ExpressionList //%prec NORMAL
     | %empty %prec EMPTY
 ;
 /*  End of declerations */
@@ -350,9 +350,9 @@ ForStatement:
 ;
 
 ForClauseParent:
-    ForCondition %prec NORMAL 
-    | ForClause %prec NORMAL
-    | RangeClause %prec NORMAL
+    ForCondition //%prec NORMAL 
+    | ForClause //%prec NORMAL
+    | RangeClause //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -367,7 +367,7 @@ ForClause:
 ;
 
 ForClauseInit:
-    InitializeStatement %prec NORMAL
+    InitializeStatement //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -376,7 +376,7 @@ ForClauseCondition:
 ;
 
 ForClauseUpdation:
-    UpdationStatement %prec NORMAL
+    UpdationStatement //%prec NORMAL
     | %empty %prec EMPTY
 ;
 
@@ -395,8 +395,8 @@ RangeClause:
 ;
 
 PreForRange:
-    ExpressionList '=' %prec NORMAL
-    | IdentifierList SHORT_DECLARATION %prec NORMAL
+    ExpressionList '=' //%prec NORMAL
+    | IdentifierList SHORT_DECLARATION //%prec NORMAL
     | %empty %prec EMPTY
 ;
 

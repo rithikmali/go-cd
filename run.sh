@@ -1,3 +1,3 @@
-flex lex.l
-bison -dy yac.y
-gcc lex.yy.c y.tab.c
+yacc -d yac2.y
+lex lex.l
+gcc lex.yy.c y.tab.c -ll
