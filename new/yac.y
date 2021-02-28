@@ -50,6 +50,8 @@ int yylineno;
 %token KEYWORD_CONST
 %token KEYWORD_TYPE
 %token KEYWORD_VAR
+%token KEYWORD_FOR
+%token KEYWORD_RANGE
 
 %token SHORT_DECLARATION
 
@@ -338,8 +340,8 @@ Statements:
 Statement:
     SimpleStatement
     | Declaration
-    /*
     | ForStatement
+    /*
     | SwitchStatement
     */
 ;
@@ -364,6 +366,64 @@ Assignment:
 ShortDeclaration:
     IdentifierList SHORT_DECLARATION ExpressionList
 ;
+
+/* For Statement */
+
+ForStatement: 
+    KEYWORD_FOR
+    ForClauseParent
+    CodeBlock
+;
+
+ForClauseParent:
+    ForCondition 
+    | ForClause
+    | RangeClause 
+    | empty
+;
+
+ForCondition:
+    Expression
+;
+
+ForClause:
+    ForClauseInit ';' 
+    ForClauseCondition ';' 
+    ForClauseUpdation
+;
+
+ForClauseInit:
+    InitializeStatement
+    | empty
+;
+
+ForClauseCondition:
+    Expression
+;
+
+ForClauseUpdation:
+    UpdationStatement
+    | empty
+;
+
+InitializeStatement:
+    SimpleStatement
+;
+
+UpdationStatement:
+    SimpleStatement
+;
+
+RangeClause:
+    PreForRange KEYWORD_RANGE Expression
+;
+
+PreForRange:
+    ExpressionList '='
+    | IdentifierList SHORT_DECLARATION
+    | empty
+;
+
 
 empty: ;
 

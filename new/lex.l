@@ -61,6 +61,8 @@ predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(l
 "const"     return KEYWORD_CONST;
 "type"      return KEYWORD_TYPE;
 "var"       return KEYWORD_VAR;
+"for"       return KEYWORD_FOR;
+"range"     return KEYWORD_RANGE;
 {predeclared_type} return P_TYPE;
 {predeclared_functions} return P_FUNCTION;
 [-+=;\(\)\{\}\[\];:]   return yytext[0];

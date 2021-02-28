@@ -74,11 +74,13 @@
      KEYWORD_CONST = 290,
      KEYWORD_TYPE = 291,
      KEYWORD_VAR = 292,
-     SHORT_DECLARATION = 293,
-     P_BOOL = 294,
-     P_NIL = 295,
-     P_TYPE = 296,
-     P_FUNCTION = 297
+     KEYWORD_FOR = 293,
+     KEYWORD_RANGE = 294,
+     SHORT_DECLARATION = 295,
+     P_BOOL = 296,
+     P_NIL = 297,
+     P_TYPE = 298,
+     P_FUNCTION = 299
    };
 #endif
 /* Tokens.  */
@@ -117,11 +119,13 @@
 #define KEYWORD_CONST 290
 #define KEYWORD_TYPE 291
 #define KEYWORD_VAR 292
-#define SHORT_DECLARATION 293
-#define P_BOOL 294
-#define P_NIL 295
-#define P_TYPE 296
-#define P_FUNCTION 297
+#define KEYWORD_FOR 293
+#define KEYWORD_RANGE 294
+#define SHORT_DECLARATION 295
+#define P_BOOL 296
+#define P_NIL 297
+#define P_TYPE 298
+#define P_FUNCTION 299
 
 
 
@@ -131,7 +135,7 @@ typedef union YYSTYPE
 #line 10 "yac.y"
 {char* str;}
 /* Line 1529 of yacc.c.  */
-#line 135 "y.tab.h"
+#line 139 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

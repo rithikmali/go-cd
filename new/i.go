@@ -1,9 +1,22 @@
 package main
- 
+
 import "fmt"
- 
+
 func main() {
-	var num1 int = 7
-	var num2 int = 8
-	var sum = num1 + num2
+
+    i := 1
+    for i <= 3 {
+        fmt.Println(i)
+        i = i + 1
+    }
+
+    for j := 7; j <= 9; j++ {
+        fmt.Println(j)
+    }
+
+    for {
+        fmt.Println("loop")
+        break
+    }
+
 }
