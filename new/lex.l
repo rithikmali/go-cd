@@ -17,7 +17,7 @@ int_literal 0|([1-9]{digit}*)
 identifier {letter}({letter}|{digit})*
 
 predeclared_type (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
-predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)
+predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(Println)|(real)|(recover)
 
 %%
 
@@ -63,6 +63,9 @@ predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(l
 "var"       return KEYWORD_VAR;
 "for"       return KEYWORD_FOR;
 "range"     return KEYWORD_RANGE;
+"switch"    return KEYWORD_SWITCH;
+"case"      return KEYWORD_CASE;
+"default"   return KEYWORD_DEFAULT;
 {predeclared_type} return P_TYPE;
 {predeclared_functions} return P_FUNCTION;
 [-+=;\(\)\{\}\[\];:]   return yytext[0];

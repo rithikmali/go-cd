@@ -52,6 +52,10 @@ int yylineno;
 %token KEYWORD_VAR
 %token KEYWORD_FOR
 %token KEYWORD_RANGE
+%token KEYWORD_DEFAULT
+%token KEYWORD_CASE
+%token KEYWORD_SWITCH
+
 
 %token SHORT_DECLARATION
 
@@ -92,7 +96,7 @@ ImportSpecificationList:
 ;
 
 ImportSpecificationList2:
-    ImportSpecification ImportSpecificationList2 //%prec NORMAL
+    ImportSpecification ImportSpecificationList2
     | empty
 ;
 
@@ -341,9 +345,7 @@ Statement:
     SimpleStatement
     | Declaration
     | ForStatement
-    /*
     | SwitchStatement
-    */
 ;
 
 SimpleStatement:
@@ -424,6 +426,48 @@ PreForRange:
     | empty
 ;
 
+/* Switch Statement */
+
+SwitchStatement:
+    ExprSwitchStmt 
+    | TypeSwitchStmt
+;
+
+ExprSwitchStmt:
+    KEYWORD_SWITCH SimpleStatement '{' ExprCaseClauses '}'
+;
+ExprCaseClauses:
+    ExprCaseClauses ExprCaseClause
+    | ExprCaseClause
+;
+
+ExprCaseClause:
+    ExprSwitchCase ':' Statements
+;
+
+ExprSwitchCase:
+    KEYWORD_CASE ExpressionList 
+    | KEYWORD_DEFAULT
+;
+
+TypeSwitchStmt:
+    KEYWORD_SWITCH SimpleStatement TypeSwitchGuard '{' TypeCaseClause '}'
+;
+
+TypeSwitchGuard:
+    IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+;
+
+TypeCaseClause:
+    TypeSwitchCase ':' Statements
+;
+TypeSwitchCase: 
+    KEYWORD_CASE TypeList
+    | KEYWORD_DEFAULT
+;
+TypeList:
+    Type ',' Type
+;
 
 empty: ;
 
