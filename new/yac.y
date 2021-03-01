@@ -297,6 +297,7 @@ UnaryExpression:
 
 PrimaryExpression:
     Operand
+    {printf("primary operand done\n");}
     | PrimaryExpression Index
 ;
 
@@ -430,6 +431,7 @@ PreForRange:
 
 SwitchStatement:
     ExprSwitchStmt 
+    {printf("switch expr done\n");}
     | TypeSwitchStmt
 ;
 
@@ -451,13 +453,18 @@ ExprSwitchCase:
 ;
 
 TypeSwitchStmt:
-    KEYWORD_SWITCH SimpleStatement TypeSwitchGuard '{' TypeCaseClause '}'
+    KEYWORD_SWITCH TypeSwitchGuard '{' TypeCaseClauses '}'
 ;
 
 TypeSwitchGuard:
-    IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+   IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+    {printf("typeswitchguard done\n");}
 ;
 
+TypeCaseClauses:
+    TypeCaseClauses TypeCaseClause
+    | TypeCaseClause
+;
 TypeCaseClause:
     TypeSwitchCase ':' Statements
 ;
@@ -471,10 +478,19 @@ TypeList:
 
 empty: ;
 
+/*
+TypeSwitchStmt  = "switch" [ SimpleStmt ";" ] TypeSwitchGuard "{" { TypeCaseClause } "}" .
+TypeSwitchGuard = [ identifier ":=" ] PrimaryExpr "." "(" "type" ")" .
+TypeCaseClause  = TypeSwitchCase ":" StatementList .
+TypeSwitchCase  = "case" TypeList | "default" .
+TypeList        = Type { "," Type } .
+*/
+
 %%
 int main (void) {
 	
 	return yyparse();
 }
+
 
 void yyerror (char *s) {fprintf (stderr, "%d %s\n",yylineno, s);} 

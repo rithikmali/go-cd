@@ -116,4 +116,4 @@ identifier {letter}({letter}|{digit})*
 {float_lit} {yylval.f = atof(yytext); return FLOAT_LITERAL;}
 . {printf("unexpected character %s",yytext);}
 
-%%
+%%{}

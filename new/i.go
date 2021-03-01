@@ -26,6 +26,19 @@ func main() {
         fmt.Println("two")
     case 3:
         fmt.Println("three")
+    default:
+        aaaa
     }
 
-}
+    switch q:= value.(type) { 
+        case bool: 
+        fmt.Println("value is of boolean type") 
+        case float64: 
+        fmt.Println("value is of float64 type") 
+        case int: 
+        fmt.Println("value is of int type") 
+        default: 
+        fmt.Printf("value is of type: %T", q) 
+          
+    } 
+};

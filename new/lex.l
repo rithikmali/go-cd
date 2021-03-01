@@ -15,9 +15,9 @@ float_literal ({decimal_digits}"."{decimal_digits}?{decimal_exponent}?)|{decimal
 
 int_literal 0|([1-9]{digit}*)
 identifier {letter}({letter}|{digit})*
-
+operator_char "+"|"&"|"("|")"|"-"|"|"|"["|"]"|"^"|":"|"."|"{"|"}"|"/"|"*"|"="|","|";"|"%"|"!"
 predeclared_type (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
-predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(Println)|(real)|(recover)
+predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)
 
 %%
 
@@ -68,7 +68,7 @@ predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(l
 "default"   return KEYWORD_DEFAULT;
 {predeclared_type} return P_TYPE;
 {predeclared_functions} return P_FUNCTION;
-[-+=;\(\)\{\}\[\];:]   return yytext[0];
+{operator_char}   return yytext[0];
 {identifier}  {printf("ID: %s\n",yytext); return IDENTIFIER;}  
 \".*\"      {printf("str: %s\n",yytext); return STRING_LITERAL;}
 {int_literal} {printf("integer: %s\n",yytext); return INT_LITERAL;}
