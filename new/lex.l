@@ -1,8 +1,9 @@
 %{
-#include "y.tab.h"
-#include<string.h>
-void yyerror (char *s);
-int yylex();
+#include "yac.tab.h"
+#include <string.h>
+#include "common.h"
+// void yyerror (char *s);
+// int yylex();
 %}
 %option yylineno
 digit [0-9]
@@ -76,4 +77,4 @@ predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(l
 [ \t\n]                ;
 
 %%
-int yywrap (void) {return 1;}
+// int yywrap (void) {return 1;}
