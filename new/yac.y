@@ -32,7 +32,7 @@ typedef struct Stack stack;
 
 stack stack_i = {.top = -1};
 stack stack_v = {.top = -1};
-stack stack_t = {.top = -1};
+stack stack_r = {.top = -1};
 stack stack_scope = {.top = -1};
 
 
@@ -331,14 +331,14 @@ ConstDeclaration:
             if (stack_v.top == -1){
                 while(!stempty(stack_i)) {
 
-                    insert('c', pop(&stack_i), pop(&stack_t), "NULL", stack_scope.s[stack_scope.top]);
+                    insert('c', pop(&stack_i), pop(&stack_r), "NULL", stack_scope.s[stack_scope.top]);
 
                 }
             }
             else {
                 while(!stempty(stack_i)) {
 
-                    insert('c', pop(&stack_i), pop(&stack_t), pop(&stack_v), stack_scope.s[stack_scope.top]);
+                    insert('c', pop(&stack_i), pop(&stack_r), pop(&stack_v), stack_scope.s[stack_scope.top]);
                 }
             }
         } 
@@ -353,13 +353,13 @@ ConstDeclaration:
             if (stack_v.top == -1){
                 while(!stempty(stack_i)) {
 
-                    insert('c', pop(&stack_i), pop(&stack_t), "NULL", stack_scope.s[stack_scope.top]);
+                    insert('c', pop(&stack_i), pop(&stack_r), "NULL", stack_scope.s[stack_scope.top]);
                 }
             }
             else {
                 while(!stempty(stack_i)) {
 
-                    insert('c', pop(&stack_i), pop(&stack_t), pop(&stack_v), stack_scope.s[stack_scope.top]);
+                    insert('c', pop(&stack_i), pop(&stack_r), pop(&stack_v), stack_scope.s[stack_scope.top]);
                 }
             }
         }  
@@ -437,7 +437,7 @@ VariableDeclaration:
             else {
                 while(!stempty(stack_i)) {
 
-                    insert('v', pop(&stack_i), pop(&stack_t), pop(&stack_v), stack_scope.s[stack_scope.top]);
+                    insert('v', pop(&stack_i), pop(&stack_r), pop(&stack_v), stack_scope.s[stack_scope.top]);
 
                 }
             }
@@ -464,7 +464,7 @@ VariableDeclaration:
                 while(!stempty(stack_i)) 
                 {
 
-                    insert('v', pop(&stack_i), pop(&stack_t), pop(&stack_v), stack_scope.s[stack_scope.top]);
+                    insert('v', pop(&stack_i), pop(&stack_r), pop(&stack_v), stack_scope.s[stack_scope.top]);
                 }
             }
         } 
@@ -571,17 +571,17 @@ ExpressionList:
     	if ($1->type == INT) 
         {
             sprintf(result, "%d", $1->value.i);
-            push(&stack_t, "int");
+            push(&stack_r, "int");
         }
         if ($1->type == FLOAT) 
         {
             sprintf(result, "%f", $1->value.f);
-            push(&stack_t, "float");
+            push(&stack_r, "float");
         }
         if ($1->type == STRING) 
         {
             strcpy(result, $1->value.str);
-            push(&stack_t, "string");
+            push(&stack_r, "string");
         }
                 
         push(&stack_v, result);
@@ -593,15 +593,15 @@ ExpressionList:
         
         if ($1->type == INT) {
             sprintf(result, "%d", $1->value.i);
-            push(&stack_t, "int");
+            push(&stack_r, "int");
         }
         if ($1->type == FLOAT) {
             sprintf(result, "%f", $1->value.f);
-            push(&stack_t, "float");
+            push(&stack_r, "float");
         }
         if ($1->type == STRING) {
             strcpy(result, $1->value.str);
-            push(&stack_t, "string");
+            push(&stack_r, "string");
         }
                 
         push(&stack_v, result);
@@ -830,14 +830,14 @@ ShortDeclaration:
             if (stack_v.top == -1){
                 while(!stempty(stack_i)) {
 
-                    insert('v', pop(&stack_i), pop(&stack_t), "NULL", stack_scope.s[stack_scope.top]);
+                    insert('v', pop(&stack_i), pop(&stack_r), "NULL", stack_scope.s[stack_scope.top]);
 
                 }
             }
             else {
                 while(!stempty(stack_i)) {
 
-                    insert('v', pop(&stack_i), pop(&stack_t), pop(&stack_v), stack_scope.s[stack_scope.top]);
+                    insert('v', pop(&stack_i), pop(&stack_r), pop(&stack_v), stack_scope.s[stack_scope.top]);
 
                 }
             }
