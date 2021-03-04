@@ -10,7 +10,7 @@ union NodeVal value;
 // int yylineno;
 int TABLE_SIZE = 10009;
 
-int base = 1000;
+int base = 100;
 
 typedef struct symbol_table {
     char name[31];
@@ -95,8 +95,6 @@ void insert(char type, char *token, char *dtype, char *value, char *scope) {
 
 	if (check(token) != 1) {
 		yyerror("variable is redeclared");
-    	/*printf("Error: %s is redeclared..!\n", token);
-    	exit(0);*/
     	return;
   	}
   	int index = hash1(token);
@@ -169,11 +167,11 @@ void update(char *token, char *dtype, char *value) {
 void disp_symtbl() {
 
 	int base = 1000;
-	printf("%s\t%s\t\t%s\t\t%s\t\t%s\n","Name", "Type","Data Type", "Value", "Scope");
+	printf("%s\t\t%s\t\t%s\t\t%s\t\t%s\n","Name", "Type","Data Type", "Value", "Scope");
 
 	for(int i=0; i<TABLE_SIZE; i++) {
 		if(hashTable[i].hcode != -1 )
-			printf("%s\t%c\t\t%s\t\t\t%s\t\t%s\n",hashTable[i].name, hashTable[i].type, hashTable[i].dtype, hashTable[i].value, hashTable[i].scope);
+			printf("%s\t\t%c\t\t%s\t\t\t%s\t\t%s\n",hashTable[i].name, hashTable[i].type, hashTable[i].dtype, hashTable[i].value, hashTable[i].scope);
 		}
 
 }
@@ -183,23 +181,21 @@ void disp_symtbl() {
 %define parse.error verbose
 %start s
 
-%type <struct node *> IdentifierList ExpressionList Expression Literal BasicLiteral Operand OperandName RelationalOperation AddOperation MultipyOperation UnaryExpression PrimaryExpression AssignOperation UnaryOperation PackageName QualifiedID Assignment VariableSpecification VariableIdList VariableIdListType Type TypeName
-
-
+%type <struct node *> IdentifierList ExpressionList Expression Literal BasicLiteral Operand OperandName RelationalOperation AddOperation MultipyOperation UnaryExpression PrimaryExpression AssignOperation UnaryOperation QualifiedID Assignment VariableSpecification VariableIdList VariableIdListType Type TypeName
 
 %token <char const *> STRING_LITERAL
 %token <int> INT_LITERAL
 %token <double> FLOAT_LITERAL
 %token <char const *> IDENTIFIER
 
-%token LOGICAL_OR
-%token LOGICAL_AND
+%token <char const *> LOGICAL_OR
+%token <char const *> LOGICAL_AND
 
-%token LSHIFT
-%token RSHIFT
-%token AMPXOR
+%token <char const *> LSHIFT
+%token <char const *> RSHIFT
+%token <char const *> AMPXOR
 
-%token CHANNEL_ASSIGN
+%token <char const *> CHANNEL_ASSIGN
 
 %token <char const *> REL_EQUAL
 %token <char const *> REL_NEQUAL
@@ -235,7 +231,7 @@ void disp_symtbl() {
 %token KEYWORD_SWITCH
 
 
-%token SHORT_DECLARATION
+%token <char const *> SHORT_DECLARATION
 
 %token <char const *> P_BOOL
 %token P_NIL
@@ -637,9 +633,7 @@ AddOperation:
 
 MultipyOperation:
     '*'
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; $$ = makeNode(OP, value, NULL, NULL);}
     | '/'
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; $$ = makeNode(OP, value, NULL, NULL);}
     | '%'
     | LSHIFT
     | RSHIFT
@@ -907,7 +901,6 @@ PreForRange:
 
 SwitchStatement:
     ExprSwitchStmt 
-    {printf("switch expr done\n");}
     | TypeSwitchStmt
 ;
 
@@ -933,25 +926,27 @@ TypeSwitchStmt:
 ;
 
 TypeSwitchGuard:
-   IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
-    {printf("typeswitchguard done\n");}
+   IDENTIFIER SHORT_DECLARATION IDENTIFIER '.' '(' KEYWORD_TYPE ')'
+   | IDENTIFIER SHORT_DECLARATION Literal '.' '(' KEYWORD_TYPE ')'
 ;
 
 TypeCaseClauses:
     TypeCaseClauses TypeCaseClause
     | TypeCaseClause
 ;
+
 TypeCaseClause:
     TypeSwitchCase ':' Statements
 ;
+
 TypeSwitchCase: 
     KEYWORD_CASE TypeList
     | KEYWORD_DEFAULT
 ;
+
 TypeList:
     Type
     | Type ',' TypeList
-    
 ;
 
 empty: %empty;
@@ -983,7 +978,7 @@ int main () {
 
 	// yydebug = 1;
 	if ( yyparse() != 0){
-		printf("BUILD FAILED...!!\n\n");
+		printf("BUILD FAILED\n\n");
 		exit(1);
 	}
 

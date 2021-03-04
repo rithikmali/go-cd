@@ -110,6 +110,18 @@ union YYSTYPE
   char const * STRING_LITERAL;
   /* IDENTIFIER  */
   char const * IDENTIFIER;
+  /* LOGICAL_OR  */
+  char const * LOGICAL_OR;
+  /* LOGICAL_AND  */
+  char const * LOGICAL_AND;
+  /* LSHIFT  */
+  char const * LSHIFT;
+  /* RSHIFT  */
+  char const * RSHIFT;
+  /* AMPXOR  */
+  char const * AMPXOR;
+  /* CHANNEL_ASSIGN  */
+  char const * CHANNEL_ASSIGN;
   /* REL_EQUAL  */
   char const * REL_EQUAL;
   /* REL_NEQUAL  */
@@ -148,6 +160,8 @@ union YYSTYPE
   char const * INC_ASSIGN;
   /* DEC_ASSIGN  */
   char const * DEC_ASSIGN;
+  /* SHORT_DECLARATION  */
+  char const * SHORT_DECLARATION;
   /* P_BOOL  */
   char const * P_BOOL;
   /* P_TYPE  */
@@ -200,7 +214,7 @@ union YYSTYPE
   struct node * OperandName;
   /* Assignment  */
   struct node * Assignment;
-#line 204 "yac.tab.h"
+#line 218 "yac.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
