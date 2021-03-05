@@ -1,3 +1,0 @@
-# go-cd
-
-yac done
