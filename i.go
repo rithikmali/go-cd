@@ -1,3 +1,0 @@
-package aaa
-
-import "fmt"

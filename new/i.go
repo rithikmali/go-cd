@@ -11,21 +11,29 @@ gvjhbkjl
 ghkbjnlkm
 jgvhbkjnl
 jhbkjnl*/
+
 package main
 
 import "fmt"
 
 func main() {
     // var b, c int = 1, 2,12,12
-    var b, c int = 1, 2
-    b="Hello"
-     var i=0
-     i=10
-     var swdk=100
+	aravind:=10
+	// mali:=1
+	// maya:=100
+    var b, c = 1, 2
+    // aravind=12
+	const s string = "constant"
+	// s="Hello"
      for i := 1; i < 5; i++ 
      {
          var z = "lex"
          const l,m,pqr,lsts,asd= 1.22, "yacc" ,1,1,12
+		 for j := 1; j < 5; j++ 
+		{
+			fmt.Println("I'm a Nested for")	
+			abad:=10		
+		}
          
     }
 
@@ -41,6 +49,14 @@ func main() {
     switch t := ooo.(type) {
     case bool:
         fmt.Println("I'm a bool")
+		switch i {
+		case 1:
+			fmt.Println("one")
+		case 2:
+			fmt.Println("two")
+		case 3:
+			fmt.Println("three")
+		}
     case int:
         fmt.Println("I'm an int")
     default:

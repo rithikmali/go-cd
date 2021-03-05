@@ -261,7 +261,7 @@ s:
         {
             printf("Invalid - reached start symbol before EOF\n"); YYERROR;
         }
-        printf("Valid\n"); 
+        printf("Parsing Successful. The given Code is Valid\n"); 
         YYACCEPT;
     }
 ;
@@ -978,7 +978,7 @@ int main () {
 
 	// yydebug = 1;
 	if ( yyparse() != 0){
-		printf("BUILD FAILED\n\n");
+		printf("Build Failed. Invalid Code\n\n");
 		exit(1);
 	}
 
