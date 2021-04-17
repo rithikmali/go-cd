@@ -1,0 +1,3765 @@
+Nonterminals useless in grammar
+
+    PackageName
+
+
+Terminals unused in grammar
+
+    PreferToRightParen
+
+
+State 42 conflicts: 1 shift/reduce
+State 86 conflicts: 1 shift/reduce
+State 100 conflicts: 5 shift/reduce
+State 157 conflicts: 1 shift/reduce
+State 163 conflicts: 5 shift/reduce
+State 186 conflicts: 2 shift/reduce
+
+
+Grammar
+
+    0 $accept: s $end
+
+    1 s: PackageClause ImportDeclarations TopLevelDeclarations
+
+    2 PackageClause: KEYWORD_PACKAGE IDENTIFIER
+
+    3 ImportDeclarations: ImportDeclaration ImportDeclarations
+    4                   | empty
+
+    5 ImportDeclaration: KEYWORD_IMPORT ImportSpecification
+    6                  | KEYWORD_IMPORT '(' ImportSpecificationList ')'
+
+    7 ImportSpecificationList: ImportSpecification ImportSpecificationList2
+
+    8 ImportSpecificationList2: ImportSpecification ImportSpecificationList2
+    9                         | %empty
+
+   10 ImportSpecification: STRING_LITERAL
+   11                    | '.' STRING_LITERAL
+   12                    | IDENTIFIER STRING_LITERAL
+
+   13 TopLevelDeclarations: TopLevelDeclaration TopLevelDeclarations
+   14                     | %empty
+
+   15 TopLevelDeclaration: Declaration
+   16                    | KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+
+   17 Declaration: ConstDeclaration
+   18            | TypeDeclaration
+   19            | VariableDeclaration
+
+   20 ConstDeclaration: KEYWORD_CONST ConstSpecification
+   21                 | KEYWORD_CONST '(' ConstSpecifications ')'
+
+   22 ConstSpecifications: ConstSpecification
+   23                    | ConstSpecifications ConstSpecification
+
+   24 ConstSpecification: IdentifierList ConstIdList
+
+   25 ConstIdList: PreConstIdList '=' ExpressionList
+
+   26 PreConstIdList: Type
+   27               | empty
+
+   28 TypeDeclaration: KEYWORD_TYPE TypeSpecifications
+
+   29 TypeSpecifications: TypeSpecification
+   30                   | '(' TypeSpecificationList ')'
+
+   31 TypeSpecificationList: TypeSpecification TypeSpecificationList
+   32                      | %empty
+
+   33 TypeSpecification: AliasDeclaration
+   34                  | TypeDefinition
+
+   35 AliasDeclaration: IDENTIFIER '=' Type
+
+   36 TypeDefinition: IDENTIFIER Type
+
+   37 VariableDeclaration: KEYWORD_VAR VariableSpecifications
+   38                    | KEYWORD_VAR '(' VariableSpecifications ')'
+
+   39 VariableSpecifications: VariableSpecification
+   40                       | VariableSpecifications VariableSpecification
+
+   41 VariableSpecification: IdentifierList VariableIdList
+
+   42 VariableIdList: Type VariableIdListType
+   43               | '=' ExpressionList
+
+   44 VariableIdListType: '=' ExpressionList
+   45                   | empty
+
+   46 IdentifierList: IDENTIFIER
+   47               | IDENTIFIER ',' IdentifierList
+
+   48 Type: TypeName
+   49     | '(' Type ')'
+
+   50 TypeName: P_TYPE
+   51         | QualifiedID
+
+   52 QualifiedID: IDENTIFIER '.' IDENTIFIER
+
+   53 ExpressionList: Expression
+   54               | Expression ',' ExpressionList
+
+   55 Expression: Expression LOGICAL_OR Expression
+   56           | Expression LOGICAL_AND Expression
+   57           | Expression RelationalOperation Expression
+   58           | Expression AddOperation Expression
+   59           | Expression MultipyOperation Expression
+   60           | UnaryExpression
+
+   61 RelationalOperation: REL_EQUAL
+   62                    | REL_NEQUAL
+   63                    | REL_LT
+   64                    | REL_LEQ
+   65                    | REL_GT
+   66                    | REL_GEQ
+
+   67 AddOperation: '+'
+   68             | '-'
+   69             | '|'
+   70             | '^'
+
+   71 MultipyOperation: '*'
+   72                 | '/'
+   73                 | '%'
+   74                 | LSHIFT
+   75                 | RSHIFT
+   76                 | '&'
+   77                 | AMPXOR
+
+   78 UnaryOperation: '+'
+   79               | '-'
+   80               | '!'
+   81               | '^'
+   82               | '*'
+   83               | '&'
+
+   84 AssignOperation: ADD_ASSIGN
+   85                | SUB_ASSIGN
+   86                | OR_ASSIGN
+   87                | XOR_ASSIGN
+   88                | MUL_ASSIGN
+   89                | DIV_ASSIGN
+   90                | MOD_ASSIGN
+   91                | AND_ASSIGN
+   92                | LSHIFT_ASSIGN
+   93                | RSHIFT_ASSIGN
+   94                | AMPXOR_ASSIGN
+
+   95 UnaryExpression: CHANNEL_ASSIGN UnaryExpression
+   96                | UnaryOperation UnaryExpression
+   97                | PrimaryExpression
+
+   98 PrimaryExpression: Operand
+   99                  | PrimaryExpression Index
+
+  100 Index: '[' Expression ']'
+
+  101 Operand: Literal
+  102        | OperandName
+  103        | '(' Expression ')'
+  104        | P_NIL
+  105        | P_BOOL
+
+  106 Literal: BasicLiteral
+
+  107 BasicLiteral: INT_LITERAL
+  108             | FLOAT_LITERAL
+  109             | STRING_LITERAL
+
+  110 OperandName: IDENTIFIER
+  111            | P_FUNCTION
+  112            | QualifiedID
+
+  113 $@1: %empty
+
+  114 $@2: %empty
+
+  115 CodeBlock: '{' $@1 Statements $@2 '}'
+
+  116 Statements: Statements Statement
+  117           | empty
+
+  118 Statement: SimpleStatement
+  119          | Declaration
+  120          | ForStatement
+  121          | SwitchStatement
+
+  122 SimpleStatement: Expression
+  123                | IncrementDecrement
+  124                | Assignment
+  125                | ShortDeclaration
+
+  126 IncrementDecrement: Expression INC_ASSIGN
+  127                   | Expression DEC_ASSIGN
+
+  128 Assignment: ExpressionList '=' ExpressionList
+  129           | ExpressionList AssignOperation ExpressionList
+
+  130 ShortDeclaration: IdentifierList SHORT_DECLARATION ExpressionList
+
+  131 ForStatement: KEYWORD_FOR ForClauseParent CodeBlock
+
+  132 ForClauseParent: ForCondition
+  133                | ForClause
+  134                | RangeClause
+  135                | empty
+
+  136 ForCondition: Expression
+
+  137 ForClause: ForClauseInit ';' ForClauseCondition ';' ForClauseUpdation
+
+  138 ForClauseInit: InitializeStatement
+  139              | empty
+
+  140 ForClauseCondition: Expression
+
+  141 ForClauseUpdation: UpdationStatement
+  142                  | empty
+
+  143 InitializeStatement: SimpleStatement
+
+  144 UpdationStatement: SimpleStatement
+
+  145 RangeClause: PreForRange KEYWORD_RANGE Expression
+
+  146 PreForRange: ExpressionList '='
+  147            | IdentifierList SHORT_DECLARATION
+  148            | empty
+
+  149 SwitchStatement: ExprSwitchStmt
+  150                | TypeSwitchStmt
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH SimpleStatement '{' ExprCaseClauses '}'
+
+  152 ExprCaseClauses: ExprCaseClauses ExprCaseClause
+  153                | ExprCaseClause
+
+  154 ExprCaseClause: ExprSwitchCase ':' Statements
+
+  155 ExprSwitchCase: KEYWORD_CASE ExpressionList
+  156               | KEYWORD_DEFAULT
+
+  157 TypeSwitchStmt: KEYWORD_SWITCH TypeSwitchGuard '{' TypeCaseClauses '}'
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+
+  159 TypeCaseClauses: TypeCaseClauses TypeCaseClause
+  160                | TypeCaseClause
+
+  161 TypeCaseClause: TypeSwitchCase ':' Statements
+
+  162 TypeSwitchCase: KEYWORD_CASE TypeList
+  163               | KEYWORD_DEFAULT
+
+  164 TypeList: Type
+  165         | Type ',' TypeList
+
+  166 empty: %empty
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '!' (33) 80
+    '%' (37) 73
+    '&' (38) 76 83
+    '(' (40) 6 16 21 30 38 49 103 158
+    ')' (41) 6 16 21 30 38 49 103 158
+    '*' (42) 71 82
+    '+' (43) 67 78
+    ',' (44) 47 54 165
+    '-' (45) 68 79
+    '.' (46) 11 52 158
+    '/' (47) 72
+    ':' (58) 154 161
+    ';' (59) 137
+    '=' (61) 25 35 43 44 128 146
+    '[' (91) 100
+    ']' (93) 100
+    '^' (94) 70 81
+    '{' (123) 115 151 157
+    '|' (124) 69
+    '}' (125) 115 151 157
+    error (256)
+    STRING_LITERAL <char const *> (258) 10 11 12 109
+    INT_LITERAL <int> (259) 107
+    FLOAT_LITERAL <double> (260) 108
+    IDENTIFIER <char const *> (261) 2 12 16 35 36 46 47 52 110 158
+    LOGICAL_OR (262) 55
+    LOGICAL_AND (263) 56
+    LSHIFT (264) 74
+    RSHIFT (265) 75
+    AMPXOR (266) 77
+    CHANNEL_ASSIGN (267) 95
+    REL_EQUAL <char const *> (268) 61
+    REL_NEQUAL <char const *> (269) 62
+    REL_LT <char const *> (270) 63
+    REL_LEQ <char const *> (271) 64
+    REL_GT <char const *> (272) 65
+    REL_GEQ <char const *> (273) 66
+    ADD_ASSIGN <char const *> (274) 84
+    SUB_ASSIGN <char const *> (275) 85
+    OR_ASSIGN <char const *> (276) 86
+    XOR_ASSIGN <char const *> (277) 87
+    MUL_ASSIGN <char const *> (278) 88
+    DIV_ASSIGN <char const *> (279) 89
+    MOD_ASSIGN <char const *> (280) 90
+    AND_ASSIGN <char const *> (281) 91
+    LSHIFT_ASSIGN <char const *> (282) 92
+    RSHIFT_ASSIGN <char const *> (283) 93
+    AMPXOR_ASSIGN <char const *> (284) 94
+    INC_ASSIGN <char const *> (285) 126
+    DEC_ASSIGN <char const *> (286) 127
+    KEYWORD_PACKAGE (287) 2
+    KEYWORD_IMPORT (288) 5 6
+    KEYWORD_FUNC (289) 16
+    KEYWORD_CONST (290) 20 21
+    KEYWORD_TYPE (291) 28 158
+    KEYWORD_VAR (292) 37 38
+    KEYWORD_FOR (293) 131
+    KEYWORD_RANGE (294) 145
+    KEYWORD_DEFAULT (295) 156 163
+    KEYWORD_CASE (296) 155 162
+    KEYWORD_SWITCH (297) 151 157
+    SHORT_DECLARATION (298) 130 147 158
+    P_BOOL <char const *> (299) 105
+    P_NIL (300) 104
+    P_TYPE <char const *> (301) 50
+    P_FUNCTION <char const *> (302) 111
+    EMPTY (303)
+    NORMAL (304)
+    P_UNARY (305)
+    PreferToRightParen (306)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (72)
+        on left: 0
+    s (73)
+        on left: 1
+        on right: 0
+    PackageClause (74)
+        on left: 2
+        on right: 1
+    ImportDeclarations (75)
+        on left: 3 4
+        on right: 1 3
+    ImportDeclaration (76)
+        on left: 5 6
+        on right: 3
+    ImportSpecificationList (77)
+        on left: 7
+        on right: 6
+    ImportSpecificationList2 (78)
+        on left: 8 9
+        on right: 7 8
+    ImportSpecification (79)
+        on left: 10 11 12
+        on right: 5 7 8
+    TopLevelDeclarations (80)
+        on left: 13 14
+        on right: 1 13
+    TopLevelDeclaration (81)
+        on left: 15 16
+        on right: 13
+    Declaration (82)
+        on left: 17 18 19
+        on right: 15 119
+    ConstDeclaration (83)
+        on left: 20 21
+        on right: 17
+    ConstSpecifications (84)
+        on left: 22 23
+        on right: 21 23
+    ConstSpecification (85)
+        on left: 24
+        on right: 20 22 23
+    ConstIdList (86)
+        on left: 25
+        on right: 24
+    PreConstIdList (87)
+        on left: 26 27
+        on right: 25
+    TypeDeclaration (88)
+        on left: 28
+        on right: 18
+    TypeSpecifications (89)
+        on left: 29 30
+        on right: 28
+    TypeSpecificationList (90)
+        on left: 31 32
+        on right: 30 31
+    TypeSpecification (91)
+        on left: 33 34
+        on right: 29 31
+    AliasDeclaration (92)
+        on left: 35
+        on right: 33
+    TypeDefinition (93)
+        on left: 36
+        on right: 34
+    VariableDeclaration (94)
+        on left: 37 38
+        on right: 19
+    VariableSpecifications (95)
+        on left: 39 40
+        on right: 37 38 40
+    VariableSpecification <struct node *> (96)
+        on left: 41
+        on right: 39 40
+    VariableIdList <struct node *> (97)
+        on left: 42 43
+        on right: 41
+    VariableIdListType <struct node *> (98)
+        on left: 44 45
+        on right: 42
+    IdentifierList <struct node *> (99)
+        on left: 46 47
+        on right: 24 41 47 130 147
+    Type <struct node *> (100)
+        on left: 48 49
+        on right: 26 35 36 42 49 164 165
+    TypeName <struct node *> (101)
+        on left: 50 51
+        on right: 48
+    QualifiedID <struct node *> (102)
+        on left: 52
+        on right: 51 112
+    ExpressionList <struct node *> (103)
+        on left: 53 54
+        on right: 25 43 44 54 128 129 130 146 155
+    Expression <struct node *> (104)
+        on left: 55 56 57 58 59 60
+        on right: 53 54 55 56 57 58 59 100 103 122 126 127 136 140 145
+    RelationalOperation <struct node *> (105)
+        on left: 61 62 63 64 65 66
+        on right: 57
+    AddOperation <struct node *> (106)
+        on left: 67 68 69 70
+        on right: 58
+    MultipyOperation <struct node *> (107)
+        on left: 71 72 73 74 75 76 77
+        on right: 59
+    UnaryOperation <struct node *> (108)
+        on left: 78 79 80 81 82 83
+        on right: 96
+    AssignOperation <struct node *> (109)
+        on left: 84 85 86 87 88 89 90 91 92 93 94
+        on right: 129
+    UnaryExpression <struct node *> (110)
+        on left: 95 96 97
+        on right: 60 95 96
+    PrimaryExpression <struct node *> (111)
+        on left: 98 99
+        on right: 97 99 158
+    Index (112)
+        on left: 100
+        on right: 99
+    Operand <struct node *> (113)
+        on left: 101 102 103 104 105
+        on right: 98
+    Literal <struct node *> (114)
+        on left: 106
+        on right: 101
+    BasicLiteral <struct node *> (115)
+        on left: 107 108 109
+        on right: 106
+    OperandName <struct node *> (116)
+        on left: 110 111 112
+        on right: 102
+    CodeBlock (117)
+        on left: 115
+        on right: 16 131
+    $@1 (118)
+        on left: 113
+        on right: 115
+    $@2 (119)
+        on left: 114
+        on right: 115
+    Statements (120)
+        on left: 116 117
+        on right: 115 116 154 161
+    Statement (121)
+        on left: 118 119 120 121
+        on right: 116
+    SimpleStatement (122)
+        on left: 122 123 124 125
+        on right: 118 143 144 151
+    IncrementDecrement (123)
+        on left: 126 127
+        on right: 123
+    Assignment <struct node *> (124)
+        on left: 128 129
+        on right: 124
+    ShortDeclaration (125)
+        on left: 130
+        on right: 125
+    ForStatement (126)
+        on left: 131
+        on right: 120
+    ForClauseParent (127)
+        on left: 132 133 134 135
+        on right: 131
+    ForCondition (128)
+        on left: 136
+        on right: 132
+    ForClause (129)
+        on left: 137
+        on right: 133
+    ForClauseInit (130)
+        on left: 138 139
+        on right: 137
+    ForClauseCondition (131)
+        on left: 140
+        on right: 137
+    ForClauseUpdation (132)
+        on left: 141 142
+        on right: 137
+    InitializeStatement (133)
+        on left: 143
+        on right: 138
+    UpdationStatement (134)
+        on left: 144
+        on right: 141
+    RangeClause (135)
+        on left: 145
+        on right: 134
+    PreForRange (136)
+        on left: 146 147 148
+        on right: 145
+    SwitchStatement (137)
+        on left: 149 150
+        on right: 121
+    ExprSwitchStmt (138)
+        on left: 151
+        on right: 149
+    ExprCaseClauses (139)
+        on left: 152 153
+        on right: 151 152
+    ExprCaseClause (140)
+        on left: 154
+        on right: 152 153
+    ExprSwitchCase (141)
+        on left: 155 156
+        on right: 154
+    TypeSwitchStmt (142)
+        on left: 157
+        on right: 150
+    TypeSwitchGuard (143)
+        on left: 158
+        on right: 157
+    TypeCaseClauses (144)
+        on left: 159 160
+        on right: 157 159
+    TypeCaseClause (145)
+        on left: 161
+        on right: 159 160
+    TypeSwitchCase (146)
+        on left: 162 163
+        on right: 161
+    TypeList (147)
+        on left: 164 165
+        on right: 162 165
+    empty (148)
+        on left: 166
+        on right: 4 27 45 117 135 139 142 148
+
+
+State 0
+
+    0 $accept: . s $end
+
+    KEYWORD_PACKAGE  shift, and go to state 1
+
+    s              go to state 2
+    PackageClause  go to state 3
+
+
+State 1
+
+    2 PackageClause: KEYWORD_PACKAGE . IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: s . $end
+
+    $end  shift, and go to state 5
+
+
+State 3
+
+    1 s: PackageClause . ImportDeclarations TopLevelDeclarations
+
+    KEYWORD_IMPORT  shift, and go to state 6
+
+    $default  reduce using rule 166 (empty)
+
+    ImportDeclarations  go to state 7
+    ImportDeclaration   go to state 8
+    empty               go to state 9
+
+
+State 4
+
+    2 PackageClause: KEYWORD_PACKAGE IDENTIFIER .
+
+    $default  reduce using rule 2 (PackageClause)
+
+
+State 5
+
+    0 $accept: s $end .
+
+    $default  accept
+
+
+State 6
+
+    5 ImportDeclaration: KEYWORD_IMPORT . ImportSpecification
+    6                  | KEYWORD_IMPORT . '(' ImportSpecificationList ')'
+
+    STRING_LITERAL  shift, and go to state 10
+    IDENTIFIER      shift, and go to state 11
+    '('             shift, and go to state 12
+    '.'             shift, and go to state 13
+
+    ImportSpecification  go to state 14
+
+
+State 7
+
+    1 s: PackageClause ImportDeclarations . TopLevelDeclarations
+
+    KEYWORD_FUNC   shift, and go to state 15
+    KEYWORD_CONST  shift, and go to state 16
+    KEYWORD_TYPE   shift, and go to state 17
+    KEYWORD_VAR    shift, and go to state 18
+
+    $default  reduce using rule 14 (TopLevelDeclarations)
+
+    TopLevelDeclarations  go to state 19
+    TopLevelDeclaration   go to state 20
+    Declaration           go to state 21
+    ConstDeclaration      go to state 22
+    TypeDeclaration       go to state 23
+    VariableDeclaration   go to state 24
+
+
+State 8
+
+    3 ImportDeclarations: ImportDeclaration . ImportDeclarations
+
+    KEYWORD_IMPORT  shift, and go to state 6
+
+    $default  reduce using rule 166 (empty)
+
+    ImportDeclarations  go to state 25
+    ImportDeclaration   go to state 8
+    empty               go to state 9
+
+
+State 9
+
+    4 ImportDeclarations: empty .
+
+    $default  reduce using rule 4 (ImportDeclarations)
+
+
+State 10
+
+   10 ImportSpecification: STRING_LITERAL .
+
+    $default  reduce using rule 10 (ImportSpecification)
+
+
+State 11
+
+   12 ImportSpecification: IDENTIFIER . STRING_LITERAL
+
+    STRING_LITERAL  shift, and go to state 26
+
+
+State 12
+
+    6 ImportDeclaration: KEYWORD_IMPORT '(' . ImportSpecificationList ')'
+
+    STRING_LITERAL  shift, and go to state 10
+    IDENTIFIER      shift, and go to state 11
+    '.'             shift, and go to state 13
+
+    ImportSpecificationList  go to state 27
+    ImportSpecification      go to state 28
+
+
+State 13
+
+   11 ImportSpecification: '.' . STRING_LITERAL
+
+    STRING_LITERAL  shift, and go to state 29
+
+
+State 14
+
+    5 ImportDeclaration: KEYWORD_IMPORT ImportSpecification .
+
+    $default  reduce using rule 5 (ImportDeclaration)
+
+
+State 15
+
+   16 TopLevelDeclaration: KEYWORD_FUNC . IDENTIFIER '(' ')' CodeBlock
+
+    IDENTIFIER  shift, and go to state 30
+
+
+State 16
+
+   20 ConstDeclaration: KEYWORD_CONST . ConstSpecification
+   21                 | KEYWORD_CONST . '(' ConstSpecifications ')'
+
+    IDENTIFIER  shift, and go to state 31
+    '('         shift, and go to state 32
+
+    ConstSpecification  go to state 33
+    IdentifierList      go to state 34
+
+
+State 17
+
+   28 TypeDeclaration: KEYWORD_TYPE . TypeSpecifications
+
+    IDENTIFIER  shift, and go to state 35
+    '('         shift, and go to state 36
+
+    TypeSpecifications  go to state 37
+    TypeSpecification   go to state 38
+    AliasDeclaration    go to state 39
+    TypeDefinition      go to state 40
+
+
+State 18
+
+   37 VariableDeclaration: KEYWORD_VAR . VariableSpecifications
+   38                    | KEYWORD_VAR . '(' VariableSpecifications ')'
+
+    IDENTIFIER  shift, and go to state 31
+    '('         shift, and go to state 41
+
+    VariableSpecifications  go to state 42
+    VariableSpecification   go to state 43
+    IdentifierList          go to state 44
+
+
+State 19
+
+    1 s: PackageClause ImportDeclarations TopLevelDeclarations .
+
+    $default  reduce using rule 1 (s)
+
+
+State 20
+
+   13 TopLevelDeclarations: TopLevelDeclaration . TopLevelDeclarations
+
+    KEYWORD_FUNC   shift, and go to state 15
+    KEYWORD_CONST  shift, and go to state 16
+    KEYWORD_TYPE   shift, and go to state 17
+    KEYWORD_VAR    shift, and go to state 18
+
+    $default  reduce using rule 14 (TopLevelDeclarations)
+
+    TopLevelDeclarations  go to state 45
+    TopLevelDeclaration   go to state 20
+    Declaration           go to state 21
+    ConstDeclaration      go to state 22
+    TypeDeclaration       go to state 23
+    VariableDeclaration   go to state 24
+
+
+State 21
+
+   15 TopLevelDeclaration: Declaration .
+
+    $default  reduce using rule 15 (TopLevelDeclaration)
+
+
+State 22
+
+   17 Declaration: ConstDeclaration .
+
+    $default  reduce using rule 17 (Declaration)
+
+
+State 23
+
+   18 Declaration: TypeDeclaration .
+
+    $default  reduce using rule 18 (Declaration)
+
+
+State 24
+
+   19 Declaration: VariableDeclaration .
+
+    $default  reduce using rule 19 (Declaration)
+
+
+State 25
+
+    3 ImportDeclarations: ImportDeclaration ImportDeclarations .
+
+    $default  reduce using rule 3 (ImportDeclarations)
+
+
+State 26
+
+   12 ImportSpecification: IDENTIFIER STRING_LITERAL .
+
+    $default  reduce using rule 12 (ImportSpecification)
+
+
+State 27
+
+    6 ImportDeclaration: KEYWORD_IMPORT '(' ImportSpecificationList . ')'
+
+    ')'  shift, and go to state 46
+
+
+State 28
+
+    7 ImportSpecificationList: ImportSpecification . ImportSpecificationList2
+
+    STRING_LITERAL  shift, and go to state 10
+    IDENTIFIER      shift, and go to state 11
+    '.'             shift, and go to state 13
+
+    $default  reduce using rule 9 (ImportSpecificationList2)
+
+    ImportSpecificationList2  go to state 47
+    ImportSpecification       go to state 48
+
+
+State 29
+
+   11 ImportSpecification: '.' STRING_LITERAL .
+
+    $default  reduce using rule 11 (ImportSpecification)
+
+
+State 30
+
+   16 TopLevelDeclaration: KEYWORD_FUNC IDENTIFIER . '(' ')' CodeBlock
+
+    '('  shift, and go to state 49
+
+
+State 31
+
+   46 IdentifierList: IDENTIFIER .
+   47               | IDENTIFIER . ',' IdentifierList
+
+    ','  shift, and go to state 50
+
+    $default  reduce using rule 46 (IdentifierList)
+
+
+State 32
+
+   21 ConstDeclaration: KEYWORD_CONST '(' . ConstSpecifications ')'
+
+    IDENTIFIER  shift, and go to state 31
+
+    ConstSpecifications  go to state 51
+    ConstSpecification   go to state 52
+    IdentifierList       go to state 34
+
+
+State 33
+
+   20 ConstDeclaration: KEYWORD_CONST ConstSpecification .
+
+    $default  reduce using rule 20 (ConstDeclaration)
+
+
+State 34
+
+   24 ConstSpecification: IdentifierList . ConstIdList
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+
+    $default  reduce using rule 166 (empty)
+
+    ConstIdList     go to state 56
+    PreConstIdList  go to state 57
+    Type            go to state 58
+    TypeName        go to state 59
+    QualifiedID     go to state 60
+    empty           go to state 61
+
+
+State 35
+
+   35 AliasDeclaration: IDENTIFIER . '=' Type
+   36 TypeDefinition: IDENTIFIER . Type
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+    '='         shift, and go to state 62
+
+    Type         go to state 63
+    TypeName     go to state 59
+    QualifiedID  go to state 60
+
+
+State 36
+
+   30 TypeSpecifications: '(' . TypeSpecificationList ')'
+
+    IDENTIFIER  shift, and go to state 35
+
+    $default  reduce using rule 32 (TypeSpecificationList)
+
+    TypeSpecificationList  go to state 64
+    TypeSpecification      go to state 65
+    AliasDeclaration       go to state 39
+    TypeDefinition         go to state 40
+
+
+State 37
+
+   28 TypeDeclaration: KEYWORD_TYPE TypeSpecifications .
+
+    $default  reduce using rule 28 (TypeDeclaration)
+
+
+State 38
+
+   29 TypeSpecifications: TypeSpecification .
+
+    $default  reduce using rule 29 (TypeSpecifications)
+
+
+State 39
+
+   33 TypeSpecification: AliasDeclaration .
+
+    $default  reduce using rule 33 (TypeSpecification)
+
+
+State 40
+
+   34 TypeSpecification: TypeDefinition .
+
+    $default  reduce using rule 34 (TypeSpecification)
+
+
+State 41
+
+   38 VariableDeclaration: KEYWORD_VAR '(' . VariableSpecifications ')'
+
+    IDENTIFIER  shift, and go to state 31
+
+    VariableSpecifications  go to state 66
+    VariableSpecification   go to state 43
+    IdentifierList          go to state 44
+
+
+State 42
+
+   37 VariableDeclaration: KEYWORD_VAR VariableSpecifications .
+   40 VariableSpecifications: VariableSpecifications . VariableSpecification
+
+    IDENTIFIER  shift, and go to state 31
+
+    IDENTIFIER  [reduce using rule 37 (VariableDeclaration)]
+    $default    reduce using rule 37 (VariableDeclaration)
+
+    VariableSpecification  go to state 67
+    IdentifierList         go to state 44
+
+
+State 43
+
+   39 VariableSpecifications: VariableSpecification .
+
+    $default  reduce using rule 39 (VariableSpecifications)
+
+
+State 44
+
+   41 VariableSpecification: IdentifierList . VariableIdList
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+    '='         shift, and go to state 68
+
+    VariableIdList  go to state 69
+    Type            go to state 70
+    TypeName        go to state 59
+    QualifiedID     go to state 60
+
+
+State 45
+
+   13 TopLevelDeclarations: TopLevelDeclaration TopLevelDeclarations .
+
+    $default  reduce using rule 13 (TopLevelDeclarations)
+
+
+State 46
+
+    6 ImportDeclaration: KEYWORD_IMPORT '(' ImportSpecificationList ')' .
+
+    $default  reduce using rule 6 (ImportDeclaration)
+
+
+State 47
+
+    7 ImportSpecificationList: ImportSpecification ImportSpecificationList2 .
+
+    $default  reduce using rule 7 (ImportSpecificationList)
+
+
+State 48
+
+    8 ImportSpecificationList2: ImportSpecification . ImportSpecificationList2
+
+    STRING_LITERAL  shift, and go to state 10
+    IDENTIFIER      shift, and go to state 11
+    '.'             shift, and go to state 13
+
+    $default  reduce using rule 9 (ImportSpecificationList2)
+
+    ImportSpecificationList2  go to state 71
+    ImportSpecification       go to state 48
+
+
+State 49
+
+   16 TopLevelDeclaration: KEYWORD_FUNC IDENTIFIER '(' . ')' CodeBlock
+
+    ')'  shift, and go to state 72
+
+
+State 50
+
+   47 IdentifierList: IDENTIFIER ',' . IdentifierList
+
+    IDENTIFIER  shift, and go to state 31
+
+    IdentifierList  go to state 73
+
+
+State 51
+
+   21 ConstDeclaration: KEYWORD_CONST '(' ConstSpecifications . ')'
+   23 ConstSpecifications: ConstSpecifications . ConstSpecification
+
+    IDENTIFIER  shift, and go to state 31
+    ')'         shift, and go to state 74
+
+    ConstSpecification  go to state 75
+    IdentifierList      go to state 34
+
+
+State 52
+
+   22 ConstSpecifications: ConstSpecification .
+
+    $default  reduce using rule 22 (ConstSpecifications)
+
+
+State 53
+
+   52 QualifiedID: IDENTIFIER . '.' IDENTIFIER
+
+    '.'  shift, and go to state 76
+
+
+State 54
+
+   50 TypeName: P_TYPE .
+
+    $default  reduce using rule 50 (TypeName)
+
+
+State 55
+
+   49 Type: '(' . Type ')'
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+
+    Type         go to state 77
+    TypeName     go to state 59
+    QualifiedID  go to state 60
+
+
+State 56
+
+   24 ConstSpecification: IdentifierList ConstIdList .
+
+    $default  reduce using rule 24 (ConstSpecification)
+
+
+State 57
+
+   25 ConstIdList: PreConstIdList . '=' ExpressionList
+
+    '='  shift, and go to state 78
+
+
+State 58
+
+   26 PreConstIdList: Type .
+
+    $default  reduce using rule 26 (PreConstIdList)
+
+
+State 59
+
+   48 Type: TypeName .
+
+    $default  reduce using rule 48 (Type)
+
+
+State 60
+
+   51 TypeName: QualifiedID .
+
+    $default  reduce using rule 51 (TypeName)
+
+
+State 61
+
+   27 PreConstIdList: empty .
+
+    $default  reduce using rule 27 (PreConstIdList)
+
+
+State 62
+
+   35 AliasDeclaration: IDENTIFIER '=' . Type
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+
+    Type         go to state 79
+    TypeName     go to state 59
+    QualifiedID  go to state 60
+
+
+State 63
+
+   36 TypeDefinition: IDENTIFIER Type .
+
+    $default  reduce using rule 36 (TypeDefinition)
+
+
+State 64
+
+   30 TypeSpecifications: '(' TypeSpecificationList . ')'
+
+    ')'  shift, and go to state 80
+
+
+State 65
+
+   31 TypeSpecificationList: TypeSpecification . TypeSpecificationList
+
+    IDENTIFIER  shift, and go to state 35
+
+    $default  reduce using rule 32 (TypeSpecificationList)
+
+    TypeSpecificationList  go to state 81
+    TypeSpecification      go to state 65
+    AliasDeclaration       go to state 39
+    TypeDefinition         go to state 40
+
+
+State 66
+
+   38 VariableDeclaration: KEYWORD_VAR '(' VariableSpecifications . ')'
+   40 VariableSpecifications: VariableSpecifications . VariableSpecification
+
+    IDENTIFIER  shift, and go to state 31
+    ')'         shift, and go to state 82
+
+    VariableSpecification  go to state 67
+    IdentifierList         go to state 44
+
+
+State 67
+
+   40 VariableSpecifications: VariableSpecifications VariableSpecification .
+
+    $default  reduce using rule 40 (VariableSpecifications)
+
+
+State 68
+
+   43 VariableIdList: '=' . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 99
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 69
+
+   41 VariableSpecification: IdentifierList VariableIdList .
+
+    $default  reduce using rule 41 (VariableSpecification)
+
+
+State 70
+
+   42 VariableIdList: Type . VariableIdListType
+
+    '='  shift, and go to state 108
+
+    $default  reduce using rule 166 (empty)
+
+    VariableIdListType  go to state 109
+    empty               go to state 110
+
+
+State 71
+
+    8 ImportSpecificationList2: ImportSpecification ImportSpecificationList2 .
+
+    $default  reduce using rule 8 (ImportSpecificationList2)
+
+
+State 72
+
+   16 TopLevelDeclaration: KEYWORD_FUNC IDENTIFIER '(' ')' . CodeBlock
+
+    '{'  shift, and go to state 111
+
+    CodeBlock  go to state 112
+
+
+State 73
+
+   47 IdentifierList: IDENTIFIER ',' IdentifierList .
+
+    $default  reduce using rule 47 (IdentifierList)
+
+
+State 74
+
+   21 ConstDeclaration: KEYWORD_CONST '(' ConstSpecifications ')' .
+
+    $default  reduce using rule 21 (ConstDeclaration)
+
+
+State 75
+
+   23 ConstSpecifications: ConstSpecifications ConstSpecification .
+
+    $default  reduce using rule 23 (ConstSpecifications)
+
+
+State 76
+
+   52 QualifiedID: IDENTIFIER '.' . IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 113
+
+
+State 77
+
+   49 Type: '(' Type . ')'
+
+    ')'  shift, and go to state 114
+
+
+State 78
+
+   25 ConstIdList: PreConstIdList '=' . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 115
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 79
+
+   35 AliasDeclaration: IDENTIFIER '=' Type .
+
+    $default  reduce using rule 35 (AliasDeclaration)
+
+
+State 80
+
+   30 TypeSpecifications: '(' TypeSpecificationList ')' .
+
+    $default  reduce using rule 30 (TypeSpecifications)
+
+
+State 81
+
+   31 TypeSpecificationList: TypeSpecification TypeSpecificationList .
+
+    $default  reduce using rule 31 (TypeSpecificationList)
+
+
+State 82
+
+   38 VariableDeclaration: KEYWORD_VAR '(' VariableSpecifications ')' .
+
+    $default  reduce using rule 38 (VariableDeclaration)
+
+
+State 83
+
+  109 BasicLiteral: STRING_LITERAL .
+
+    $default  reduce using rule 109 (BasicLiteral)
+
+
+State 84
+
+  107 BasicLiteral: INT_LITERAL .
+
+    $default  reduce using rule 107 (BasicLiteral)
+
+
+State 85
+
+  108 BasicLiteral: FLOAT_LITERAL .
+
+    $default  reduce using rule 108 (BasicLiteral)
+
+
+State 86
+
+   52 QualifiedID: IDENTIFIER . '.' IDENTIFIER
+  110 OperandName: IDENTIFIER .
+
+    '.'  shift, and go to state 76
+
+    '.'       [reduce using rule 110 (OperandName)]
+    $default  reduce using rule 110 (OperandName)
+
+
+State 87
+
+   95 UnaryExpression: CHANNEL_ASSIGN . UnaryExpression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 116
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 88
+
+  105 Operand: P_BOOL .
+
+    $default  reduce using rule 105 (Operand)
+
+
+State 89
+
+  104 Operand: P_NIL .
+
+    $default  reduce using rule 104 (Operand)
+
+
+State 90
+
+  111 OperandName: P_FUNCTION .
+
+    $default  reduce using rule 111 (OperandName)
+
+
+State 91
+
+   78 UnaryOperation: '+' .
+
+    $default  reduce using rule 78 (UnaryOperation)
+
+
+State 92
+
+   79 UnaryOperation: '-' .
+
+    $default  reduce using rule 79 (UnaryOperation)
+
+
+State 93
+
+   81 UnaryOperation: '^' .
+
+    $default  reduce using rule 81 (UnaryOperation)
+
+
+State 94
+
+   82 UnaryOperation: '*' .
+
+    $default  reduce using rule 82 (UnaryOperation)
+
+
+State 95
+
+   83 UnaryOperation: '&' .
+
+    $default  reduce using rule 83 (UnaryOperation)
+
+
+State 96
+
+  103 Operand: '(' . Expression ')'
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 117
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 97
+
+   80 UnaryOperation: '!' .
+
+    $default  reduce using rule 80 (UnaryOperation)
+
+
+State 98
+
+  112 OperandName: QualifiedID .
+
+    $default  reduce using rule 112 (OperandName)
+
+
+State 99
+
+   43 VariableIdList: '=' ExpressionList .
+
+    $default  reduce using rule 43 (VariableIdList)
+
+
+State 100
+
+   53 ExpressionList: Expression .
+   54               | Expression . ',' ExpressionList
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+    ','          shift, and go to state 137
+
+    '+'       [reduce using rule 53 (ExpressionList)]
+    '-'       [reduce using rule 53 (ExpressionList)]
+    '^'       [reduce using rule 53 (ExpressionList)]
+    '*'       [reduce using rule 53 (ExpressionList)]
+    '&'       [reduce using rule 53 (ExpressionList)]
+    $default  reduce using rule 53 (ExpressionList)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 101
+
+   96 UnaryExpression: UnaryOperation . UnaryExpression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 141
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 102
+
+   60 Expression: UnaryExpression .
+
+    $default  reduce using rule 60 (Expression)
+
+
+State 103
+
+   97 UnaryExpression: PrimaryExpression .
+   99 PrimaryExpression: PrimaryExpression . Index
+
+    '['  shift, and go to state 142
+
+    $default  reduce using rule 97 (UnaryExpression)
+
+    Index  go to state 143
+
+
+State 104
+
+   98 PrimaryExpression: Operand .
+
+    $default  reduce using rule 98 (PrimaryExpression)
+
+
+State 105
+
+  101 Operand: Literal .
+
+    $default  reduce using rule 101 (Operand)
+
+
+State 106
+
+  106 Literal: BasicLiteral .
+
+    $default  reduce using rule 106 (Literal)
+
+
+State 107
+
+  102 Operand: OperandName .
+
+    $default  reduce using rule 102 (Operand)
+
+
+State 108
+
+   44 VariableIdListType: '=' . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 144
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 109
+
+   42 VariableIdList: Type VariableIdListType .
+
+    $default  reduce using rule 42 (VariableIdList)
+
+
+State 110
+
+   45 VariableIdListType: empty .
+
+    $default  reduce using rule 45 (VariableIdListType)
+
+
+State 111
+
+  115 CodeBlock: '{' . $@1 Statements $@2 '}'
+
+    $default  reduce using rule 113 ($@1)
+
+    $@1  go to state 145
+
+
+State 112
+
+   16 TopLevelDeclaration: KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock .
+
+    $default  reduce using rule 16 (TopLevelDeclaration)
+
+
+State 113
+
+   52 QualifiedID: IDENTIFIER '.' IDENTIFIER .
+
+    $default  reduce using rule 52 (QualifiedID)
+
+
+State 114
+
+   49 Type: '(' Type ')' .
+
+    $default  reduce using rule 49 (Type)
+
+
+State 115
+
+   25 ConstIdList: PreConstIdList '=' ExpressionList .
+
+    $default  reduce using rule 25 (ConstIdList)
+
+
+State 116
+
+   95 UnaryExpression: CHANNEL_ASSIGN UnaryExpression .
+
+    $default  reduce using rule 95 (UnaryExpression)
+
+
+State 117
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  103 Operand: '(' Expression . ')'
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+    ')'          shift, and go to state 146
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 118
+
+   55 Expression: Expression LOGICAL_OR . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 147
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 119
+
+   56 Expression: Expression LOGICAL_AND . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 148
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 120
+
+   74 MultipyOperation: LSHIFT .
+
+    $default  reduce using rule 74 (MultipyOperation)
+
+
+State 121
+
+   75 MultipyOperation: RSHIFT .
+
+    $default  reduce using rule 75 (MultipyOperation)
+
+
+State 122
+
+   77 MultipyOperation: AMPXOR .
+
+    $default  reduce using rule 77 (MultipyOperation)
+
+
+State 123
+
+   61 RelationalOperation: REL_EQUAL .
+
+    $default  reduce using rule 61 (RelationalOperation)
+
+
+State 124
+
+   62 RelationalOperation: REL_NEQUAL .
+
+    $default  reduce using rule 62 (RelationalOperation)
+
+
+State 125
+
+   63 RelationalOperation: REL_LT .
+
+    $default  reduce using rule 63 (RelationalOperation)
+
+
+State 126
+
+   64 RelationalOperation: REL_LEQ .
+
+    $default  reduce using rule 64 (RelationalOperation)
+
+
+State 127
+
+   65 RelationalOperation: REL_GT .
+
+    $default  reduce using rule 65 (RelationalOperation)
+
+
+State 128
+
+   66 RelationalOperation: REL_GEQ .
+
+    $default  reduce using rule 66 (RelationalOperation)
+
+
+State 129
+
+   67 AddOperation: '+' .
+
+    $default  reduce using rule 67 (AddOperation)
+
+
+State 130
+
+   68 AddOperation: '-' .
+
+    $default  reduce using rule 68 (AddOperation)
+
+
+State 131
+
+   69 AddOperation: '|' .
+
+    $default  reduce using rule 69 (AddOperation)
+
+
+State 132
+
+   70 AddOperation: '^' .
+
+    $default  reduce using rule 70 (AddOperation)
+
+
+State 133
+
+   71 MultipyOperation: '*' .
+
+    $default  reduce using rule 71 (MultipyOperation)
+
+
+State 134
+
+   72 MultipyOperation: '/' .
+
+    $default  reduce using rule 72 (MultipyOperation)
+
+
+State 135
+
+   73 MultipyOperation: '%' .
+
+    $default  reduce using rule 73 (MultipyOperation)
+
+
+State 136
+
+   76 MultipyOperation: '&' .
+
+    $default  reduce using rule 76 (MultipyOperation)
+
+
+State 137
+
+   54 ExpressionList: Expression ',' . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 149
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 138
+
+   57 Expression: Expression RelationalOperation . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 150
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 139
+
+   58 Expression: Expression AddOperation . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 151
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 140
+
+   59 Expression: Expression MultipyOperation . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 152
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 141
+
+   96 UnaryExpression: UnaryOperation UnaryExpression .
+
+    $default  reduce using rule 96 (UnaryExpression)
+
+
+State 142
+
+  100 Index: '[' . Expression ']'
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 153
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 143
+
+   99 PrimaryExpression: PrimaryExpression Index .
+
+    $default  reduce using rule 99 (PrimaryExpression)
+
+
+State 144
+
+   44 VariableIdListType: '=' ExpressionList .
+
+    $default  reduce using rule 44 (VariableIdListType)
+
+
+State 145
+
+  115 CodeBlock: '{' $@1 . Statements $@2 '}'
+
+    $default  reduce using rule 166 (empty)
+
+    Statements  go to state 154
+    empty       go to state 155
+
+
+State 146
+
+  103 Operand: '(' Expression ')' .
+
+    $default  reduce using rule 103 (Operand)
+
+
+State 147
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   55           | Expression LOGICAL_OR Expression .
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+
+    $default  reduce using rule 55 (Expression)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 148
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   56           | Expression LOGICAL_AND Expression .
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+
+    LSHIFT      shift, and go to state 120
+    RSHIFT      shift, and go to state 121
+    AMPXOR      shift, and go to state 122
+    REL_EQUAL   shift, and go to state 123
+    REL_NEQUAL  shift, and go to state 124
+    REL_LT      shift, and go to state 125
+    REL_LEQ     shift, and go to state 126
+    REL_GT      shift, and go to state 127
+    REL_GEQ     shift, and go to state 128
+    '+'         shift, and go to state 129
+    '-'         shift, and go to state 130
+    '|'         shift, and go to state 131
+    '^'         shift, and go to state 132
+    '*'         shift, and go to state 133
+    '/'         shift, and go to state 134
+    '%'         shift, and go to state 135
+    '&'         shift, and go to state 136
+
+    $default  reduce using rule 56 (Expression)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 149
+
+   54 ExpressionList: Expression ',' ExpressionList .
+
+    $default  reduce using rule 54 (ExpressionList)
+
+
+State 150
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   57           | Expression RelationalOperation Expression .
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+
+    LSHIFT  shift, and go to state 120
+    RSHIFT  shift, and go to state 121
+    AMPXOR  shift, and go to state 122
+    '+'     shift, and go to state 129
+    '-'     shift, and go to state 130
+    '|'     shift, and go to state 131
+    '^'     shift, and go to state 132
+    '*'     shift, and go to state 133
+    '/'     shift, and go to state 134
+    '%'     shift, and go to state 135
+    '&'     shift, and go to state 136
+
+    $default  reduce using rule 57 (Expression)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 151
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   58           | Expression AddOperation Expression .
+   59           | Expression . MultipyOperation Expression
+
+    LSHIFT  shift, and go to state 120
+    RSHIFT  shift, and go to state 121
+    AMPXOR  shift, and go to state 122
+    '*'     shift, and go to state 133
+    '/'     shift, and go to state 134
+    '%'     shift, and go to state 135
+    '&'     shift, and go to state 136
+
+    $default  reduce using rule 58 (Expression)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 152
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+   59           | Expression MultipyOperation Expression .
+
+    LSHIFT  shift, and go to state 120
+    RSHIFT  shift, and go to state 121
+    AMPXOR  shift, and go to state 122
+    '*'     shift, and go to state 133
+    '/'     shift, and go to state 134
+    '%'     shift, and go to state 135
+    '&'     shift, and go to state 136
+
+    $default  reduce using rule 59 (Expression)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 153
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  100 Index: '[' Expression . ']'
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+    ']'          shift, and go to state 156
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 154
+
+  115 CodeBlock: '{' $@1 Statements . $@2 '}'
+  116 Statements: Statements . Statement
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 157
+    CHANNEL_ASSIGN  shift, and go to state 87
+    KEYWORD_CONST   shift, and go to state 16
+    KEYWORD_TYPE    shift, and go to state 17
+    KEYWORD_VAR     shift, and go to state 18
+    KEYWORD_FOR     shift, and go to state 158
+    KEYWORD_SWITCH  shift, and go to state 159
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 114 ($@2)
+
+    Declaration          go to state 160
+    ConstDeclaration     go to state 22
+    TypeDeclaration      go to state 23
+    VariableDeclaration  go to state 24
+    IdentifierList       go to state 161
+    QualifiedID          go to state 98
+    ExpressionList       go to state 162
+    Expression           go to state 163
+    UnaryOperation       go to state 101
+    UnaryExpression      go to state 102
+    PrimaryExpression    go to state 103
+    Operand              go to state 104
+    Literal              go to state 105
+    BasicLiteral         go to state 106
+    OperandName          go to state 107
+    $@2                  go to state 164
+    Statement            go to state 165
+    SimpleStatement      go to state 166
+    IncrementDecrement   go to state 167
+    Assignment           go to state 168
+    ShortDeclaration     go to state 169
+    ForStatement         go to state 170
+    SwitchStatement      go to state 171
+    ExprSwitchStmt       go to state 172
+    TypeSwitchStmt       go to state 173
+
+
+State 155
+
+  117 Statements: empty .
+
+    $default  reduce using rule 117 (Statements)
+
+
+State 156
+
+  100 Index: '[' Expression ']' .
+
+    $default  reduce using rule 100 (Index)
+
+
+State 157
+
+   46 IdentifierList: IDENTIFIER .
+   47               | IDENTIFIER . ',' IdentifierList
+   52 QualifiedID: IDENTIFIER . '.' IDENTIFIER
+  110 OperandName: IDENTIFIER .
+
+    '.'  shift, and go to state 76
+    ','  shift, and go to state 50
+
+    SHORT_DECLARATION  reduce using rule 46 (IdentifierList)
+    ','                [reduce using rule 110 (OperandName)]
+    $default           reduce using rule 110 (OperandName)
+
+
+State 158
+
+  131 ForStatement: KEYWORD_FOR . ForClauseParent CodeBlock
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 157
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 166 (empty)
+
+    IdentifierList       go to state 174
+    QualifiedID          go to state 98
+    ExpressionList       go to state 175
+    Expression           go to state 176
+    UnaryOperation       go to state 101
+    UnaryExpression      go to state 102
+    PrimaryExpression    go to state 103
+    Operand              go to state 104
+    Literal              go to state 105
+    BasicLiteral         go to state 106
+    OperandName          go to state 107
+    SimpleStatement      go to state 177
+    IncrementDecrement   go to state 167
+    Assignment           go to state 168
+    ShortDeclaration     go to state 169
+    ForClauseParent      go to state 178
+    ForCondition         go to state 179
+    ForClause            go to state 180
+    ForClauseInit        go to state 181
+    InitializeStatement  go to state 182
+    RangeClause          go to state 183
+    PreForRange          go to state 184
+    empty                go to state 185
+
+
+State 159
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH . SimpleStatement '{' ExprCaseClauses '}'
+  157 TypeSwitchStmt: KEYWORD_SWITCH . TypeSwitchGuard '{' TypeCaseClauses '}'
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 186
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    IdentifierList      go to state 161
+    QualifiedID         go to state 98
+    ExpressionList      go to state 162
+    Expression          go to state 163
+    UnaryOperation      go to state 101
+    UnaryExpression     go to state 102
+    PrimaryExpression   go to state 103
+    Operand             go to state 104
+    Literal             go to state 105
+    BasicLiteral        go to state 106
+    OperandName         go to state 107
+    SimpleStatement     go to state 187
+    IncrementDecrement  go to state 167
+    Assignment          go to state 168
+    ShortDeclaration    go to state 169
+    TypeSwitchGuard     go to state 188
+
+
+State 160
+
+  119 Statement: Declaration .
+
+    $default  reduce using rule 119 (Statement)
+
+
+State 161
+
+  130 ShortDeclaration: IdentifierList . SHORT_DECLARATION ExpressionList
+
+    SHORT_DECLARATION  shift, and go to state 189
+
+
+State 162
+
+  128 Assignment: ExpressionList . '=' ExpressionList
+  129           | ExpressionList . AssignOperation ExpressionList
+
+    ADD_ASSIGN     shift, and go to state 190
+    SUB_ASSIGN     shift, and go to state 191
+    OR_ASSIGN      shift, and go to state 192
+    XOR_ASSIGN     shift, and go to state 193
+    MUL_ASSIGN     shift, and go to state 194
+    DIV_ASSIGN     shift, and go to state 195
+    MOD_ASSIGN     shift, and go to state 196
+    AND_ASSIGN     shift, and go to state 197
+    LSHIFT_ASSIGN  shift, and go to state 198
+    RSHIFT_ASSIGN  shift, and go to state 199
+    AMPXOR_ASSIGN  shift, and go to state 200
+    '='            shift, and go to state 201
+
+    AssignOperation  go to state 202
+
+
+State 163
+
+   53 ExpressionList: Expression .
+   54               | Expression . ',' ExpressionList
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  122 SimpleStatement: Expression .
+  126 IncrementDecrement: Expression . INC_ASSIGN
+  127                   | Expression . DEC_ASSIGN
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    INC_ASSIGN   shift, and go to state 203
+    DEC_ASSIGN   shift, and go to state 204
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+    ','          shift, and go to state 137
+
+    ADD_ASSIGN     reduce using rule 53 (ExpressionList)
+    SUB_ASSIGN     reduce using rule 53 (ExpressionList)
+    OR_ASSIGN      reduce using rule 53 (ExpressionList)
+    XOR_ASSIGN     reduce using rule 53 (ExpressionList)
+    MUL_ASSIGN     reduce using rule 53 (ExpressionList)
+    DIV_ASSIGN     reduce using rule 53 (ExpressionList)
+    MOD_ASSIGN     reduce using rule 53 (ExpressionList)
+    AND_ASSIGN     reduce using rule 53 (ExpressionList)
+    LSHIFT_ASSIGN  reduce using rule 53 (ExpressionList)
+    RSHIFT_ASSIGN  reduce using rule 53 (ExpressionList)
+    AMPXOR_ASSIGN  reduce using rule 53 (ExpressionList)
+    '+'            [reduce using rule 122 (SimpleStatement)]
+    '-'            [reduce using rule 122 (SimpleStatement)]
+    '^'            [reduce using rule 122 (SimpleStatement)]
+    '*'            [reduce using rule 122 (SimpleStatement)]
+    '&'            [reduce using rule 122 (SimpleStatement)]
+    '='            reduce using rule 53 (ExpressionList)
+    $default       reduce using rule 122 (SimpleStatement)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 164
+
+  115 CodeBlock: '{' $@1 Statements $@2 . '}'
+
+    '}'  shift, and go to state 205
+
+
+State 165
+
+  116 Statements: Statements Statement .
+
+    $default  reduce using rule 116 (Statements)
+
+
+State 166
+
+  118 Statement: SimpleStatement .
+
+    $default  reduce using rule 118 (Statement)
+
+
+State 167
+
+  123 SimpleStatement: IncrementDecrement .
+
+    $default  reduce using rule 123 (SimpleStatement)
+
+
+State 168
+
+  124 SimpleStatement: Assignment .
+
+    $default  reduce using rule 124 (SimpleStatement)
+
+
+State 169
+
+  125 SimpleStatement: ShortDeclaration .
+
+    $default  reduce using rule 125 (SimpleStatement)
+
+
+State 170
+
+  120 Statement: ForStatement .
+
+    $default  reduce using rule 120 (Statement)
+
+
+State 171
+
+  121 Statement: SwitchStatement .
+
+    $default  reduce using rule 121 (Statement)
+
+
+State 172
+
+  149 SwitchStatement: ExprSwitchStmt .
+
+    $default  reduce using rule 149 (SwitchStatement)
+
+
+State 173
+
+  150 SwitchStatement: TypeSwitchStmt .
+
+    $default  reduce using rule 150 (SwitchStatement)
+
+
+State 174
+
+  130 ShortDeclaration: IdentifierList . SHORT_DECLARATION ExpressionList
+  147 PreForRange: IdentifierList . SHORT_DECLARATION
+
+    SHORT_DECLARATION  shift, and go to state 206
+
+
+State 175
+
+  128 Assignment: ExpressionList . '=' ExpressionList
+  129           | ExpressionList . AssignOperation ExpressionList
+  146 PreForRange: ExpressionList . '='
+
+    ADD_ASSIGN     shift, and go to state 190
+    SUB_ASSIGN     shift, and go to state 191
+    OR_ASSIGN      shift, and go to state 192
+    XOR_ASSIGN     shift, and go to state 193
+    MUL_ASSIGN     shift, and go to state 194
+    DIV_ASSIGN     shift, and go to state 195
+    MOD_ASSIGN     shift, and go to state 196
+    AND_ASSIGN     shift, and go to state 197
+    LSHIFT_ASSIGN  shift, and go to state 198
+    RSHIFT_ASSIGN  shift, and go to state 199
+    AMPXOR_ASSIGN  shift, and go to state 200
+    '='            shift, and go to state 207
+
+    AssignOperation  go to state 202
+
+
+State 176
+
+   53 ExpressionList: Expression .
+   54               | Expression . ',' ExpressionList
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  122 SimpleStatement: Expression .
+  126 IncrementDecrement: Expression . INC_ASSIGN
+  127                   | Expression . DEC_ASSIGN
+  136 ForCondition: Expression .
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    INC_ASSIGN   shift, and go to state 203
+    DEC_ASSIGN   shift, and go to state 204
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+    ','          shift, and go to state 137
+
+    '{'       reduce using rule 136 (ForCondition)
+    ';'       reduce using rule 122 (SimpleStatement)
+    $default  reduce using rule 53 (ExpressionList)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 177
+
+  143 InitializeStatement: SimpleStatement .
+
+    $default  reduce using rule 143 (InitializeStatement)
+
+
+State 178
+
+  131 ForStatement: KEYWORD_FOR ForClauseParent . CodeBlock
+
+    '{'  shift, and go to state 111
+
+    CodeBlock  go to state 208
+
+
+State 179
+
+  132 ForClauseParent: ForCondition .
+
+    $default  reduce using rule 132 (ForClauseParent)
+
+
+State 180
+
+  133 ForClauseParent: ForClause .
+
+    $default  reduce using rule 133 (ForClauseParent)
+
+
+State 181
+
+  137 ForClause: ForClauseInit . ';' ForClauseCondition ';' ForClauseUpdation
+
+    ';'  shift, and go to state 209
+
+
+State 182
+
+  138 ForClauseInit: InitializeStatement .
+
+    $default  reduce using rule 138 (ForClauseInit)
+
+
+State 183
+
+  134 ForClauseParent: RangeClause .
+
+    $default  reduce using rule 134 (ForClauseParent)
+
+
+State 184
+
+  145 RangeClause: PreForRange . KEYWORD_RANGE Expression
+
+    KEYWORD_RANGE  shift, and go to state 210
+
+
+State 185
+
+  135 ForClauseParent: empty .
+  139 ForClauseInit: empty .
+  148 PreForRange: empty .
+
+    KEYWORD_RANGE  reduce using rule 148 (PreForRange)
+    ';'            reduce using rule 139 (ForClauseInit)
+    $default       reduce using rule 135 (ForClauseParent)
+
+
+State 186
+
+   46 IdentifierList: IDENTIFIER .
+   47               | IDENTIFIER . ',' IdentifierList
+   52 QualifiedID: IDENTIFIER . '.' IDENTIFIER
+  110 OperandName: IDENTIFIER .
+  158 TypeSwitchGuard: IDENTIFIER . SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+
+    SHORT_DECLARATION  shift, and go to state 211
+    '.'                shift, and go to state 76
+    ','                shift, and go to state 50
+
+    SHORT_DECLARATION  [reduce using rule 46 (IdentifierList)]
+    ','                [reduce using rule 110 (OperandName)]
+    $default           reduce using rule 110 (OperandName)
+
+
+State 187
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH SimpleStatement . '{' ExprCaseClauses '}'
+
+    '{'  shift, and go to state 212
+
+
+State 188
+
+  157 TypeSwitchStmt: KEYWORD_SWITCH TypeSwitchGuard . '{' TypeCaseClauses '}'
+
+    '{'  shift, and go to state 213
+
+
+State 189
+
+  130 ShortDeclaration: IdentifierList SHORT_DECLARATION . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 214
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 190
+
+   84 AssignOperation: ADD_ASSIGN .
+
+    $default  reduce using rule 84 (AssignOperation)
+
+
+State 191
+
+   85 AssignOperation: SUB_ASSIGN .
+
+    $default  reduce using rule 85 (AssignOperation)
+
+
+State 192
+
+   86 AssignOperation: OR_ASSIGN .
+
+    $default  reduce using rule 86 (AssignOperation)
+
+
+State 193
+
+   87 AssignOperation: XOR_ASSIGN .
+
+    $default  reduce using rule 87 (AssignOperation)
+
+
+State 194
+
+   88 AssignOperation: MUL_ASSIGN .
+
+    $default  reduce using rule 88 (AssignOperation)
+
+
+State 195
+
+   89 AssignOperation: DIV_ASSIGN .
+
+    $default  reduce using rule 89 (AssignOperation)
+
+
+State 196
+
+   90 AssignOperation: MOD_ASSIGN .
+
+    $default  reduce using rule 90 (AssignOperation)
+
+
+State 197
+
+   91 AssignOperation: AND_ASSIGN .
+
+    $default  reduce using rule 91 (AssignOperation)
+
+
+State 198
+
+   92 AssignOperation: LSHIFT_ASSIGN .
+
+    $default  reduce using rule 92 (AssignOperation)
+
+
+State 199
+
+   93 AssignOperation: RSHIFT_ASSIGN .
+
+    $default  reduce using rule 93 (AssignOperation)
+
+
+State 200
+
+   94 AssignOperation: AMPXOR_ASSIGN .
+
+    $default  reduce using rule 94 (AssignOperation)
+
+
+State 201
+
+  128 Assignment: ExpressionList '=' . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 215
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 202
+
+  129 Assignment: ExpressionList AssignOperation . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 216
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 203
+
+  126 IncrementDecrement: Expression INC_ASSIGN .
+
+    $default  reduce using rule 126 (IncrementDecrement)
+
+
+State 204
+
+  127 IncrementDecrement: Expression DEC_ASSIGN .
+
+    $default  reduce using rule 127 (IncrementDecrement)
+
+
+State 205
+
+  115 CodeBlock: '{' $@1 Statements $@2 '}' .
+
+    $default  reduce using rule 115 (CodeBlock)
+
+
+State 206
+
+  130 ShortDeclaration: IdentifierList SHORT_DECLARATION . ExpressionList
+  147 PreForRange: IdentifierList SHORT_DECLARATION .
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 147 (PreForRange)
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 214
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 207
+
+  128 Assignment: ExpressionList '=' . ExpressionList
+  146 PreForRange: ExpressionList '=' .
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 146 (PreForRange)
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 215
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 208
+
+  131 ForStatement: KEYWORD_FOR ForClauseParent CodeBlock .
+
+    $default  reduce using rule 131 (ForStatement)
+
+
+State 209
+
+  137 ForClause: ForClauseInit ';' . ForClauseCondition ';' ForClauseUpdation
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID         go to state 98
+    Expression          go to state 217
+    UnaryOperation      go to state 101
+    UnaryExpression     go to state 102
+    PrimaryExpression   go to state 103
+    Operand             go to state 104
+    Literal             go to state 105
+    BasicLiteral        go to state 106
+    OperandName         go to state 107
+    ForClauseCondition  go to state 218
+
+
+State 210
+
+  145 RangeClause: PreForRange KEYWORD_RANGE . Expression
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    Expression         go to state 219
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 211
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION . PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '('             shift, and go to state 96
+
+    QualifiedID        go to state 98
+    PrimaryExpression  go to state 220
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 212
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH SimpleStatement '{' . ExprCaseClauses '}'
+
+    KEYWORD_DEFAULT  shift, and go to state 221
+    KEYWORD_CASE     shift, and go to state 222
+
+    ExprCaseClauses  go to state 223
+    ExprCaseClause   go to state 224
+    ExprSwitchCase   go to state 225
+
+
+State 213
+
+  157 TypeSwitchStmt: KEYWORD_SWITCH TypeSwitchGuard '{' . TypeCaseClauses '}'
+
+    KEYWORD_DEFAULT  shift, and go to state 226
+    KEYWORD_CASE     shift, and go to state 227
+
+    TypeCaseClauses  go to state 228
+    TypeCaseClause   go to state 229
+    TypeSwitchCase   go to state 230
+
+
+State 214
+
+  130 ShortDeclaration: IdentifierList SHORT_DECLARATION ExpressionList .
+
+    $default  reduce using rule 130 (ShortDeclaration)
+
+
+State 215
+
+  128 Assignment: ExpressionList '=' ExpressionList .
+
+    $default  reduce using rule 128 (Assignment)
+
+
+State 216
+
+  129 Assignment: ExpressionList AssignOperation ExpressionList .
+
+    $default  reduce using rule 129 (Assignment)
+
+
+State 217
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  140 ForClauseCondition: Expression .
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+
+    $default  reduce using rule 140 (ForClauseCondition)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 218
+
+  137 ForClause: ForClauseInit ';' ForClauseCondition . ';' ForClauseUpdation
+
+    ';'  shift, and go to state 231
+
+
+State 219
+
+   55 Expression: Expression . LOGICAL_OR Expression
+   56           | Expression . LOGICAL_AND Expression
+   57           | Expression . RelationalOperation Expression
+   58           | Expression . AddOperation Expression
+   59           | Expression . MultipyOperation Expression
+  145 RangeClause: PreForRange KEYWORD_RANGE Expression .
+
+    LOGICAL_OR   shift, and go to state 118
+    LOGICAL_AND  shift, and go to state 119
+    LSHIFT       shift, and go to state 120
+    RSHIFT       shift, and go to state 121
+    AMPXOR       shift, and go to state 122
+    REL_EQUAL    shift, and go to state 123
+    REL_NEQUAL   shift, and go to state 124
+    REL_LT       shift, and go to state 125
+    REL_LEQ      shift, and go to state 126
+    REL_GT       shift, and go to state 127
+    REL_GEQ      shift, and go to state 128
+    '+'          shift, and go to state 129
+    '-'          shift, and go to state 130
+    '|'          shift, and go to state 131
+    '^'          shift, and go to state 132
+    '*'          shift, and go to state 133
+    '/'          shift, and go to state 134
+    '%'          shift, and go to state 135
+    '&'          shift, and go to state 136
+
+    $default  reduce using rule 145 (RangeClause)
+
+    RelationalOperation  go to state 138
+    AddOperation         go to state 139
+    MultipyOperation     go to state 140
+
+
+State 220
+
+   99 PrimaryExpression: PrimaryExpression . Index
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression . '.' '(' KEYWORD_TYPE ')'
+
+    '.'  shift, and go to state 232
+    '['  shift, and go to state 142
+
+    Index  go to state 143
+
+
+State 221
+
+  156 ExprSwitchCase: KEYWORD_DEFAULT .
+
+    $default  reduce using rule 156 (ExprSwitchCase)
+
+
+State 222
+
+  155 ExprSwitchCase: KEYWORD_CASE . ExpressionList
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 86
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    QualifiedID        go to state 98
+    ExpressionList     go to state 233
+    Expression         go to state 100
+    UnaryOperation     go to state 101
+    UnaryExpression    go to state 102
+    PrimaryExpression  go to state 103
+    Operand            go to state 104
+    Literal            go to state 105
+    BasicLiteral       go to state 106
+    OperandName        go to state 107
+
+
+State 223
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH SimpleStatement '{' ExprCaseClauses . '}'
+  152 ExprCaseClauses: ExprCaseClauses . ExprCaseClause
+
+    KEYWORD_DEFAULT  shift, and go to state 221
+    KEYWORD_CASE     shift, and go to state 222
+    '}'              shift, and go to state 234
+
+    ExprCaseClause  go to state 235
+    ExprSwitchCase  go to state 225
+
+
+State 224
+
+  153 ExprCaseClauses: ExprCaseClause .
+
+    $default  reduce using rule 153 (ExprCaseClauses)
+
+
+State 225
+
+  154 ExprCaseClause: ExprSwitchCase . ':' Statements
+
+    ':'  shift, and go to state 236
+
+
+State 226
+
+  163 TypeSwitchCase: KEYWORD_DEFAULT .
+
+    $default  reduce using rule 163 (TypeSwitchCase)
+
+
+State 227
+
+  162 TypeSwitchCase: KEYWORD_CASE . TypeList
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+
+    Type         go to state 237
+    TypeName     go to state 59
+    QualifiedID  go to state 60
+    TypeList     go to state 238
+
+
+State 228
+
+  157 TypeSwitchStmt: KEYWORD_SWITCH TypeSwitchGuard '{' TypeCaseClauses . '}'
+  159 TypeCaseClauses: TypeCaseClauses . TypeCaseClause
+
+    KEYWORD_DEFAULT  shift, and go to state 226
+    KEYWORD_CASE     shift, and go to state 227
+    '}'              shift, and go to state 239
+
+    TypeCaseClause  go to state 240
+    TypeSwitchCase  go to state 230
+
+
+State 229
+
+  160 TypeCaseClauses: TypeCaseClause .
+
+    $default  reduce using rule 160 (TypeCaseClauses)
+
+
+State 230
+
+  161 TypeCaseClause: TypeSwitchCase . ':' Statements
+
+    ':'  shift, and go to state 241
+
+
+State 231
+
+  137 ForClause: ForClauseInit ';' ForClauseCondition ';' . ForClauseUpdation
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 157
+    CHANNEL_ASSIGN  shift, and go to state 87
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 166 (empty)
+
+    IdentifierList      go to state 161
+    QualifiedID         go to state 98
+    ExpressionList      go to state 162
+    Expression          go to state 163
+    UnaryOperation      go to state 101
+    UnaryExpression     go to state 102
+    PrimaryExpression   go to state 103
+    Operand             go to state 104
+    Literal             go to state 105
+    BasicLiteral        go to state 106
+    OperandName         go to state 107
+    SimpleStatement     go to state 242
+    IncrementDecrement  go to state 167
+    Assignment          go to state 168
+    ShortDeclaration    go to state 169
+    ForClauseUpdation   go to state 243
+    UpdationStatement   go to state 244
+    empty               go to state 245
+
+
+State 232
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' . '(' KEYWORD_TYPE ')'
+
+    '('  shift, and go to state 246
+
+
+State 233
+
+  155 ExprSwitchCase: KEYWORD_CASE ExpressionList .
+
+    $default  reduce using rule 155 (ExprSwitchCase)
+
+
+State 234
+
+  151 ExprSwitchStmt: KEYWORD_SWITCH SimpleStatement '{' ExprCaseClauses '}' .
+
+    $default  reduce using rule 151 (ExprSwitchStmt)
+
+
+State 235
+
+  152 ExprCaseClauses: ExprCaseClauses ExprCaseClause .
+
+    $default  reduce using rule 152 (ExprCaseClauses)
+
+
+State 236
+
+  154 ExprCaseClause: ExprSwitchCase ':' . Statements
+
+    $default  reduce using rule 166 (empty)
+
+    Statements  go to state 247
+    empty       go to state 155
+
+
+State 237
+
+  164 TypeList: Type .
+  165         | Type . ',' TypeList
+
+    ','  shift, and go to state 248
+
+    $default  reduce using rule 164 (TypeList)
+
+
+State 238
+
+  162 TypeSwitchCase: KEYWORD_CASE TypeList .
+
+    $default  reduce using rule 162 (TypeSwitchCase)
+
+
+State 239
+
+  157 TypeSwitchStmt: KEYWORD_SWITCH TypeSwitchGuard '{' TypeCaseClauses '}' .
+
+    $default  reduce using rule 157 (TypeSwitchStmt)
+
+
+State 240
+
+  159 TypeCaseClauses: TypeCaseClauses TypeCaseClause .
+
+    $default  reduce using rule 159 (TypeCaseClauses)
+
+
+State 241
+
+  161 TypeCaseClause: TypeSwitchCase ':' . Statements
+
+    $default  reduce using rule 166 (empty)
+
+    Statements  go to state 249
+    empty       go to state 155
+
+
+State 242
+
+  144 UpdationStatement: SimpleStatement .
+
+    $default  reduce using rule 144 (UpdationStatement)
+
+
+State 243
+
+  137 ForClause: ForClauseInit ';' ForClauseCondition ';' ForClauseUpdation .
+
+    $default  reduce using rule 137 (ForClause)
+
+
+State 244
+
+  141 ForClauseUpdation: UpdationStatement .
+
+    $default  reduce using rule 141 (ForClauseUpdation)
+
+
+State 245
+
+  142 ForClauseUpdation: empty .
+
+    $default  reduce using rule 142 (ForClauseUpdation)
+
+
+State 246
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' . KEYWORD_TYPE ')'
+
+    KEYWORD_TYPE  shift, and go to state 250
+
+
+State 247
+
+  116 Statements: Statements . Statement
+  154 ExprCaseClause: ExprSwitchCase ':' Statements .
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 157
+    CHANNEL_ASSIGN  shift, and go to state 87
+    KEYWORD_CONST   shift, and go to state 16
+    KEYWORD_TYPE    shift, and go to state 17
+    KEYWORD_VAR     shift, and go to state 18
+    KEYWORD_FOR     shift, and go to state 158
+    KEYWORD_SWITCH  shift, and go to state 159
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 154 (ExprCaseClause)
+
+    Declaration          go to state 160
+    ConstDeclaration     go to state 22
+    TypeDeclaration      go to state 23
+    VariableDeclaration  go to state 24
+    IdentifierList       go to state 161
+    QualifiedID          go to state 98
+    ExpressionList       go to state 162
+    Expression           go to state 163
+    UnaryOperation       go to state 101
+    UnaryExpression      go to state 102
+    PrimaryExpression    go to state 103
+    Operand              go to state 104
+    Literal              go to state 105
+    BasicLiteral         go to state 106
+    OperandName          go to state 107
+    Statement            go to state 165
+    SimpleStatement      go to state 166
+    IncrementDecrement   go to state 167
+    Assignment           go to state 168
+    ShortDeclaration     go to state 169
+    ForStatement         go to state 170
+    SwitchStatement      go to state 171
+    ExprSwitchStmt       go to state 172
+    TypeSwitchStmt       go to state 173
+
+
+State 248
+
+  165 TypeList: Type ',' . TypeList
+
+    IDENTIFIER  shift, and go to state 53
+    P_TYPE      shift, and go to state 54
+    '('         shift, and go to state 55
+
+    Type         go to state 237
+    TypeName     go to state 59
+    QualifiedID  go to state 60
+    TypeList     go to state 251
+
+
+State 249
+
+  116 Statements: Statements . Statement
+  161 TypeCaseClause: TypeSwitchCase ':' Statements .
+
+    STRING_LITERAL  shift, and go to state 83
+    INT_LITERAL     shift, and go to state 84
+    FLOAT_LITERAL   shift, and go to state 85
+    IDENTIFIER      shift, and go to state 157
+    CHANNEL_ASSIGN  shift, and go to state 87
+    KEYWORD_CONST   shift, and go to state 16
+    KEYWORD_TYPE    shift, and go to state 17
+    KEYWORD_VAR     shift, and go to state 18
+    KEYWORD_FOR     shift, and go to state 158
+    KEYWORD_SWITCH  shift, and go to state 159
+    P_BOOL          shift, and go to state 88
+    P_NIL           shift, and go to state 89
+    P_FUNCTION      shift, and go to state 90
+    '+'             shift, and go to state 91
+    '-'             shift, and go to state 92
+    '^'             shift, and go to state 93
+    '*'             shift, and go to state 94
+    '&'             shift, and go to state 95
+    '('             shift, and go to state 96
+    '!'             shift, and go to state 97
+
+    $default  reduce using rule 161 (TypeCaseClause)
+
+    Declaration          go to state 160
+    ConstDeclaration     go to state 22
+    TypeDeclaration      go to state 23
+    VariableDeclaration  go to state 24
+    IdentifierList       go to state 161
+    QualifiedID          go to state 98
+    ExpressionList       go to state 162
+    Expression           go to state 163
+    UnaryOperation       go to state 101
+    UnaryExpression      go to state 102
+    PrimaryExpression    go to state 103
+    Operand              go to state 104
+    Literal              go to state 105
+    BasicLiteral         go to state 106
+    OperandName          go to state 107
+    Statement            go to state 165
+    SimpleStatement      go to state 166
+    IncrementDecrement   go to state 167
+    Assignment           go to state 168
+    ShortDeclaration     go to state 169
+    ForStatement         go to state 170
+    SwitchStatement      go to state 171
+    ExprSwitchStmt       go to state 172
+    TypeSwitchStmt       go to state 173
+
+
+State 250
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE . ')'
+
+    ')'  shift, and go to state 252
+
+
+State 251
+
+  165 TypeList: Type ',' TypeList .
+
+    $default  reduce using rule 165 (TypeList)
+
+
+State 252
+
+  158 TypeSwitchGuard: IDENTIFIER SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')' .
+
+    $default  reduce using rule 158 (TypeSwitchGuard)

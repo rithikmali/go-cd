@@ -1,0 +1,1625 @@
+yac.y: warning: 123 shift/reduce conflicts [-Wconflicts-sr]
+yac.y: warning: 3 reduce/reduce conflicts [-Wconflicts-rr]
+yac.y: warning: shift/reduce conflict on token IDENTIFIER [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_TYPE '(' IDENTIFIER • IDENTIFIER '.' IDENTIFIER TypeSpecificationList ')' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                               $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                   TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ TypeDeclaration
+                                               ↳ KEYWORD_TYPE TypeSpecifications
+                                                              ↳ '(' TypeSpecificationList                                                    ')'
+                                                                    ↳ TypeDefinition                                   TypeSpecificationList
+                                                                      ↳ IDENTIFIER Type
+                                                                                   ↳ TypeName
+                                                                                     ↳ QualifiedID
+                                                                                       ↳ PackageName    '.' IDENTIFIER
+                                                                                         ↳ • IDENTIFIER
+  Second example: PackageClause ImportDeclarations KEYWORD_TYPE '(' IDENTIFIER • IDENTIFIER '=' Type TypeSpecificationList ')' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                               $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                   TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ TypeDeclaration
+                                               ↳ KEYWORD_TYPE TypeSpecifications
+                                                              ↳ '(' TypeSpecificationList                                                    ')'
+                                                                    ↳ TypeSpecification      TypeSpecificationList
+                                                                      ↳ TypeDefinition       ↳ TypeSpecification       TypeSpecificationList
+                                                                        ↳ IDENTIFIER Type      ↳ AliasDeclaration
+                                                                                     ↳ empty     ↳ IDENTIFIER '=' Type
+                                                                                       ↳ •
+yac.y: warning: shift/reduce conflict on token '(' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: '(' IDENTIFIER TypeSpecifications
+  Shift derivation
+    Statements
+    ↳ PackageName      Statement
+      ↳ '(' IDENTIFIER ↳ Declaration
+                         ↳ TypeDeclaration
+                           ↳ TypeSpecifications
+  Second example: IDENTIFIER
+  Reduce derivation
+    Statements
+    ↳ IDENTIFIER Statement
+                 ↳ ε
+yac.y: warning: shift/reduce conflict on token IDENTIFIER [-Wcounterexamples]
+  Example: Statements KEYWORD_VAR VariableSpecifications • IDENTIFIER
+  Shift derivation
+    Statements
+    ↳ Statements Statement
+                 ↳ Declaration
+                   ↳ VariableDeclaration
+                     ↳ KEYWORD_VAR VariableSpecifications
+                                   ↳ VariableSpecifications VariableSpecification
+                                                            ↳ IdentifierList VariableIdList
+                                                              ↳ • IDENTIFIER ↳ Type VariableIdListType
+                                                                               ↳ ε  ↳ ε
+  Reduce derivation
+    Statements
+    ↳ Statements                                              Statement
+      ↳ Statements Statement                                  ↳ SimpleStatement
+                   ↳ Declaration                                ↳ Expression
+                     ↳ VariableDeclaration                        ↳ UnaryExpression
+                       ↳ KEYWORD_VAR VariableSpecifications •       ↳ PrimaryExpression
+                                                                      ↳ Operand
+                                                                        ↳ OperandName
+                                                                          ↳ IDENTIFIER
+yac.y: warning: shift/reduce conflict on token IDENTIFIER [-Wcounterexamples]
+time limit exceeded: 6.000000
+  First example: PackageClause ImportDeclarations KEYWORD_VAR IdentifierList • IDENTIFIER '.' IDENTIFIER VariableIdListType VariableSpecification TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                             $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                 TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ VariableDeclaration
+                                               ↳ KEYWORD_VAR VariableSpecifications
+                                                             ↳ VariableSpecification                                                     VariableSpecification
+                                                               ↳ IdentifierList VariableIdList
+                                                                                ↳ Type                                VariableIdListType
+                                                                                  ↳ TypeName
+                                                                                    ↳ QualifiedID
+                                                                                      ↳ PackageName    '.' IDENTIFIER
+                                                                                        ↳ • IDENTIFIER
+  Second example: PackageClause ImportDeclarations KEYWORD_VAR IdentifierList • VariableIdListType IDENTIFIER VariableIdList TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                             $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                 TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ VariableDeclaration
+                                               ↳ KEYWORD_VAR VariableSpecifications
+                                                             ↳ VariableSpecifications                          VariableSpecification
+                                                               ↳ VariableSpecification                         ↳ IdentifierList VariableIdList
+                                                                 ↳ IdentifierList VariableIdList                 ↳ IDENTIFIER
+                                                                                  ↳ Type    VariableIdListType
+                                                                                    ↳ empty
+                                                                                      ↳ •
+yac.y: warning: shift/reduce conflict on token '(' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: '(' IDENTIFIER VariableSpecifications
+  Shift derivation
+    Statements
+    ↳ PackageName      Statement
+      ↳ '(' IDENTIFIER ↳ Declaration
+                         ↳ VariableDeclaration
+                           ↳ VariableSpecifications
+  Second example: IDENTIFIER
+  Reduce derivation
+    Statements
+    ↳ IDENTIFIER Statement
+                 ↳ ε
+yac.y: warning: reduce/reduce conflict on token '=' [-Wcounterexamples]
+  Example: empty •
+  First reduce derivation
+    PreConstIdList
+    ↳ empty •
+  Second reduce derivation
+    PreConstIdList
+    ↳ Type
+      ↳ empty •
+yac.y: warning: shift/reduce conflict on token IDENTIFIER [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_TYPE '(' IDENTIFIER '=' • IDENTIFIER '.' IDENTIFIER TypeSpecificationList ')' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                   $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                       TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ TypeDeclaration
+                                               ↳ KEYWORD_TYPE TypeSpecifications
+                                                              ↳ '(' TypeSpecificationList                                                        ')'
+                                                                    ↳ AliasDeclaration                                     TypeSpecificationList
+                                                                      ↳ IDENTIFIER '=' Type
+                                                                                       ↳ TypeName
+                                                                                         ↳ QualifiedID
+                                                                                           ↳ PackageName    '.' IDENTIFIER
+                                                                                             ↳ • IDENTIFIER
+  Second example: PackageClause ImportDeclarations KEYWORD_TYPE '(' IDENTIFIER '=' • IDENTIFIER '=' Type TypeSpecificationList ')' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                   $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                       TopLevelDeclarations
+                                           ↳ Declaration
+                                             ↳ TypeDeclaration
+                                               ↳ KEYWORD_TYPE TypeSpecifications
+                                                              ↳ '(' TypeSpecificationList                                                        ')'
+                                                                    ↳ TypeSpecification          TypeSpecificationList
+                                                                      ↳ AliasDeclaration         ↳ TypeSpecification       TypeSpecificationList
+                                                                        ↳ IDENTIFIER '=' Type      ↳ AliasDeclaration
+                                                                                         ↳ empty     ↳ IDENTIFIER '=' Type
+                                                                                           ↳ •
+yac.y: warning: shift/reduce conflict on token '(' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '(' IDENTIFIER
+  Shift derivation
+    Statements
+    ↳ • Statement
+        ↳ Declaration
+          ↳ TypeDeclaration
+            ↳ PackageName
+              ↳ '(' IDENTIFIER
+  Second example: IDENTIFIER
+  Reduce derivation
+    Statements
+    ↳ IDENTIFIER Statement
+                 ↳ ε
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '+' '=' ExpressionList
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '+'      ↳ SimpleStatement
+                     ↳ Assignment
+                       ↳ '=' ExpressionList
+  Second example: '+'
+  Reduce derivation
+    Statements
+    ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '-' '=' ExpressionList
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '-'      ↳ SimpleStatement
+                     ↳ Assignment
+                       ↳ '=' ExpressionList
+  Second example: '-'
+  Reduce derivation
+    Statements
+    ↳ '-'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '^' '=' ExpressionList
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '^'      ↳ SimpleStatement
+                     ↳ Assignment
+                       ↳ '=' ExpressionList
+  Second example: '^'
+  Reduce derivation
+    Statements
+    ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '*' '=' ExpressionList
+  Shift derivation
+    Statements
+    ↳ MultipyOperation Statement
+      ↳ • '*'          ↳ SimpleStatement
+                         ↳ Assignment
+                           ↳ '=' ExpressionList
+  Second example: '*'
+  Reduce derivation
+    Statements
+    ↳ '*'
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '&' '=' ExpressionList
+  Shift derivation
+    Statements
+    ↳ MultipyOperation Statement
+      ↳ • '&'          ↳ SimpleStatement
+                         ↳ Assignment
+                           ↳ '=' ExpressionList
+  Second example: '&'
+  Reduce derivation
+    Statements
+    ↳ '&'
+yac.y: warning: reduce/reduce conflict on token ',' [-Wcounterexamples]
+  Example: IDENTIFIER •
+  First reduce derivation
+    IdentifierList
+    ↳ IDENTIFIER •
+  Second reduce derivation
+    Statement
+    ↳ SimpleStatement
+      ↳ Expression
+        ↳ UnaryExpression
+          ↳ PrimaryExpression
+            ↳ Operand
+              ↳ OperandName
+                ↳ IDENTIFIER •
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '+'
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '+'      ↳ ε
+  Second example: '+'
+  Reduce derivation
+    Statements
+    ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '-'
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '-'      ↳ ε
+  Second example: '-'
+  Reduce derivation
+    Statements
+    ↳ '-'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '^'
+  Shift derivation
+    Statements
+    ↳ AddOperation Statement
+      ↳ • '^'      ↳ ε
+  Second example: '^'
+  Reduce derivation
+    Statements
+    ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '*'
+  Shift derivation
+    Statements
+    ↳ MultipyOperation Statement
+      ↳ • '*'          ↳ ε
+  Second example: '*'
+  Reduce derivation
+    Statements
+    ↳ '*'
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: • '&'
+  Shift derivation
+    Statements
+    ↳ MultipyOperation Statement
+      ↳ • '&'          ↳ ε
+  Second example: '&'
+  Reduce derivation
+    Statements
+    ↳ '&'
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: ',' Expression • '+'
+  Shift derivation
+    Statements
+    ↳ ',' Statement
+          ↳ SimpleStatement
+            ↳ Assignment
+              ↳ Expression AddOperation
+                           ↳ • '+'
+  Second example: '+'
+  Reduce derivation
+    Statements
+    ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: ',' Expression • '-'
+  Shift derivation
+    Statements
+    ↳ ',' Statement
+          ↳ SimpleStatement
+            ↳ Assignment
+              ↳ Expression AddOperation
+                           ↳ • '-'
+  Second example: '-'
+  Reduce derivation
+    Statements
+    ↳ '-'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: ',' Expression • '^'
+  Shift derivation
+    Statements
+    ↳ ',' Statement
+          ↳ SimpleStatement
+            ↳ Assignment
+              ↳ Expression AddOperation
+                           ↳ • '^'
+  Second example: '^'
+  Reduce derivation
+    Statements
+    ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: ',' Expression • '*'
+  Shift derivation
+    Statements
+    ↳ ',' Statement
+          ↳ SimpleStatement
+            ↳ Assignment
+              ↳ Expression MultipyOperation
+                           ↳ • '*'
+  Second example: '*'
+  Reduce derivation
+    Statements
+    ↳ '*'
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+Productions leading up to the conflict state found.  Still finding a possible unifying counterexample...time limit exceeded: 6.000000
+  First example: ',' Expression • '&'
+  Shift derivation
+    Statements
+    ↳ ',' Statement
+          ↳ SimpleStatement
+            ↳ Assignment
+              ↳ Expression MultipyOperation
+                           ↳ • '&'
+  Second example: '&'
+  Reduce derivation
+    Statements
+    ↳ '&'
+yac.y: warning: shift/reduce conflict on token LOGICAL_OR [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • LOGICAL_OR Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression • LOGICAL_OR Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                           LOGICAL_OR Expression
+      ↳ Expression LOGICAL_OR Expression •
+yac.y: warning: shift/reduce conflict on token LOGICAL_AND [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • LOGICAL_AND Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression • LOGICAL_AND Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                           LOGICAL_AND Expression
+      ↳ Expression LOGICAL_OR Expression •
+yac.y: warning: shift/reduce conflict on token REL_EQUAL [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_EQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_EQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_EQUAL
+yac.y: warning: shift/reduce conflict on token REL_NEQUAL [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_NEQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_NEQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_NEQUAL
+yac.y: warning: shift/reduce conflict on token REL_LT [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_LT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_LT
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_LT
+yac.y: warning: shift/reduce conflict on token REL_LEQ [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_LEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_LEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_LEQ
+yac.y: warning: shift/reduce conflict on token REL_GT [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_GT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_GT
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_GT
+yac.y: warning: shift/reduce conflict on token REL_GEQ [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • REL_GEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression RelationalOperation Expression
+                                         ↳ • REL_GEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                           RelationalOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ REL_GEQ
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '+' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression AddOperation Expression
+                                         ↳ • '+'
+  Reduce derivation
+    Expression
+    ↳ Expression                           AddOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '-' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression AddOperation Expression
+                                         ↳ • '-'
+  Reduce derivation
+    Expression
+    ↳ Expression                           AddOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '-'
+yac.y: warning: shift/reduce conflict on token '|' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '|' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression AddOperation Expression
+                                         ↳ • '|'
+  Reduce derivation
+    Expression
+    ↳ Expression                           AddOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '|'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '^' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression AddOperation Expression
+                                         ↳ • '^'
+  Reduce derivation
+    Expression
+    ↳ Expression                           AddOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '*' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • '*'
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '*'
+yac.y: warning: shift/reduce conflict on token '/' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '/' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • '/'
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '/'
+yac.y: warning: shift/reduce conflict on token '%' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '%' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • '%'
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '%'
+yac.y: warning: shift/reduce conflict on token LSHIFT [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • LSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • LSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ LSHIFT
+yac.y: warning: shift/reduce conflict on token RSHIFT [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • RSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • RSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ RSHIFT
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • '&' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • '&'
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ '&'
+yac.y: warning: shift/reduce conflict on token AMPXOR [-Wcounterexamples]
+  Example: Expression LOGICAL_OR Expression • AMPXOR Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_OR Expression
+                            ↳ Expression MultipyOperation Expression
+                                         ↳ • AMPXOR
+  Reduce derivation
+    Expression
+    ↳ Expression                           MultipyOperation Expression
+      ↳ Expression LOGICAL_OR Expression • ↳ AMPXOR
+yac.y: warning: shift/reduce conflict on token LOGICAL_OR [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • LOGICAL_OR Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression • LOGICAL_OR Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                            LOGICAL_OR Expression
+      ↳ Expression LOGICAL_AND Expression •
+yac.y: warning: shift/reduce conflict on token LOGICAL_AND [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • LOGICAL_AND Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression • LOGICAL_AND Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                            LOGICAL_AND Expression
+      ↳ Expression LOGICAL_AND Expression •
+yac.y: warning: shift/reduce conflict on token REL_EQUAL [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_EQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_EQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_EQUAL
+yac.y: warning: shift/reduce conflict on token REL_NEQUAL [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_NEQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_NEQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_NEQUAL
+yac.y: warning: shift/reduce conflict on token REL_LT [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_LT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_LT
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_LT
+yac.y: warning: shift/reduce conflict on token REL_LEQ [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_LEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_LEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_LEQ
+yac.y: warning: shift/reduce conflict on token REL_GT [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_GT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_GT
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_GT
+yac.y: warning: shift/reduce conflict on token REL_GEQ [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • REL_GEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression RelationalOperation Expression
+                                          ↳ • REL_GEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                            RelationalOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ REL_GEQ
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '+' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression AddOperation Expression
+                                          ↳ • '+'
+  Reduce derivation
+    Expression
+    ↳ Expression                            AddOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '-' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression AddOperation Expression
+                                          ↳ • '-'
+  Reduce derivation
+    Expression
+    ↳ Expression                            AddOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '-'
+yac.y: warning: shift/reduce conflict on token '|' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '|' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression AddOperation Expression
+                                          ↳ • '|'
+  Reduce derivation
+    Expression
+    ↳ Expression                            AddOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '|'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '^' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression AddOperation Expression
+                                          ↳ • '^'
+  Reduce derivation
+    Expression
+    ↳ Expression                            AddOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '*' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • '*'
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '*'
+yac.y: warning: shift/reduce conflict on token '/' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '/' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • '/'
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '/'
+yac.y: warning: shift/reduce conflict on token '%' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '%' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • '%'
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '%'
+yac.y: warning: shift/reduce conflict on token LSHIFT [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • LSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • LSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ LSHIFT
+yac.y: warning: shift/reduce conflict on token RSHIFT [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • RSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • RSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ RSHIFT
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • '&' Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • '&'
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ '&'
+yac.y: warning: shift/reduce conflict on token AMPXOR [-Wcounterexamples]
+  Example: Expression LOGICAL_AND Expression • AMPXOR Expression
+  Shift derivation
+    Expression
+    ↳ Expression LOGICAL_AND Expression
+                             ↳ Expression MultipyOperation Expression
+                                          ↳ • AMPXOR
+  Reduce derivation
+    Expression
+    ↳ Expression                            MultipyOperation Expression
+      ↳ Expression LOGICAL_AND Expression • ↳ AMPXOR
+yac.y: warning: shift/reduce conflict on token LOGICAL_OR [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • LOGICAL_OR Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression • LOGICAL_OR Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                                    LOGICAL_OR Expression
+      ↳ Expression RelationalOperation Expression •
+yac.y: warning: shift/reduce conflict on token LOGICAL_AND [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • LOGICAL_AND Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression • LOGICAL_AND Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                                    LOGICAL_AND Expression
+      ↳ Expression RelationalOperation Expression •
+yac.y: warning: shift/reduce conflict on token REL_EQUAL [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_EQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_EQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_EQUAL
+yac.y: warning: shift/reduce conflict on token REL_NEQUAL [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_NEQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_NEQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_NEQUAL
+yac.y: warning: shift/reduce conflict on token REL_LT [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_LT Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_LT
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_LT
+yac.y: warning: shift/reduce conflict on token REL_LEQ [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_LEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_LEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_LEQ
+yac.y: warning: shift/reduce conflict on token REL_GT [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_GT Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_GT
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_GT
+yac.y: warning: shift/reduce conflict on token REL_GEQ [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • REL_GEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression RelationalOperation Expression
+                                                  ↳ • REL_GEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                                    RelationalOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ REL_GEQ
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '+' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression AddOperation Expression
+                                                  ↳ • '+'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    AddOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '-' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression AddOperation Expression
+                                                  ↳ • '-'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    AddOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '-'
+yac.y: warning: shift/reduce conflict on token '|' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '|' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression AddOperation Expression
+                                                  ↳ • '|'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    AddOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '|'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '^' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression AddOperation Expression
+                                                  ↳ • '^'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    AddOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '*' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • '*'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '*'
+yac.y: warning: shift/reduce conflict on token '/' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '/' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • '/'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '/'
+yac.y: warning: shift/reduce conflict on token '%' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '%' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • '%'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '%'
+yac.y: warning: shift/reduce conflict on token LSHIFT [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • LSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • LSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ LSHIFT
+yac.y: warning: shift/reduce conflict on token RSHIFT [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • RSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • RSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ RSHIFT
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • '&' Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • '&'
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ '&'
+yac.y: warning: shift/reduce conflict on token AMPXOR [-Wcounterexamples]
+  Example: Expression RelationalOperation Expression • AMPXOR Expression
+  Shift derivation
+    Expression
+    ↳ Expression RelationalOperation Expression
+                                     ↳ Expression MultipyOperation Expression
+                                                  ↳ • AMPXOR
+  Reduce derivation
+    Expression
+    ↳ Expression                                    MultipyOperation Expression
+      ↳ Expression RelationalOperation Expression • ↳ AMPXOR
+yac.y: warning: shift/reduce conflict on token LOGICAL_OR [-Wcounterexamples]
+  Example: Expression AddOperation Expression • LOGICAL_OR Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression • LOGICAL_OR Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                             LOGICAL_OR Expression
+      ↳ Expression AddOperation Expression •
+yac.y: warning: shift/reduce conflict on token LOGICAL_AND [-Wcounterexamples]
+  Example: Expression AddOperation Expression • LOGICAL_AND Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression • LOGICAL_AND Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                             LOGICAL_AND Expression
+      ↳ Expression AddOperation Expression •
+yac.y: warning: shift/reduce conflict on token REL_EQUAL [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_EQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_EQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_EQUAL
+yac.y: warning: shift/reduce conflict on token REL_NEQUAL [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_NEQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_NEQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_NEQUAL
+yac.y: warning: shift/reduce conflict on token REL_LT [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_LT Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_LT
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_LT
+yac.y: warning: shift/reduce conflict on token REL_LEQ [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_LEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_LEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_LEQ
+yac.y: warning: shift/reduce conflict on token REL_GT [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_GT Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_GT
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_GT
+yac.y: warning: shift/reduce conflict on token REL_GEQ [-Wcounterexamples]
+  Example: Expression AddOperation Expression • REL_GEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression RelationalOperation Expression
+                                           ↳ • REL_GEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                             RelationalOperation Expression
+      ↳ Expression AddOperation Expression • ↳ REL_GEQ
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '+' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression AddOperation Expression
+                                           ↳ • '+'
+  Reduce derivation
+    Expression
+    ↳ Expression                             AddOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '-' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression AddOperation Expression
+                                           ↳ • '-'
+  Reduce derivation
+    Expression
+    ↳ Expression                             AddOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '-'
+yac.y: warning: shift/reduce conflict on token '|' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '|' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression AddOperation Expression
+                                           ↳ • '|'
+  Reduce derivation
+    Expression
+    ↳ Expression                             AddOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '|'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '^' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression AddOperation Expression
+                                           ↳ • '^'
+  Reduce derivation
+    Expression
+    ↳ Expression                             AddOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '*' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • '*'
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '*'
+yac.y: warning: shift/reduce conflict on token '/' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '/' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • '/'
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '/'
+yac.y: warning: shift/reduce conflict on token '%' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '%' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • '%'
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '%'
+yac.y: warning: shift/reduce conflict on token LSHIFT [-Wcounterexamples]
+  Example: Expression AddOperation Expression • LSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • LSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ LSHIFT
+yac.y: warning: shift/reduce conflict on token RSHIFT [-Wcounterexamples]
+  Example: Expression AddOperation Expression • RSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • RSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ RSHIFT
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  Example: Expression AddOperation Expression • '&' Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • '&'
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ '&'
+yac.y: warning: shift/reduce conflict on token AMPXOR [-Wcounterexamples]
+  Example: Expression AddOperation Expression • AMPXOR Expression
+  Shift derivation
+    Expression
+    ↳ Expression AddOperation Expression
+                              ↳ Expression MultipyOperation Expression
+                                           ↳ • AMPXOR
+  Reduce derivation
+    Expression
+    ↳ Expression                             MultipyOperation Expression
+      ↳ Expression AddOperation Expression • ↳ AMPXOR
+yac.y: warning: shift/reduce conflict on token LOGICAL_OR [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • LOGICAL_OR Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression • LOGICAL_OR Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                                 LOGICAL_OR Expression
+      ↳ Expression MultipyOperation Expression •
+yac.y: warning: shift/reduce conflict on token LOGICAL_AND [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • LOGICAL_AND Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression • LOGICAL_AND Expression
+  Reduce derivation
+    Expression
+    ↳ Expression                                 LOGICAL_AND Expression
+      ↳ Expression MultipyOperation Expression •
+yac.y: warning: shift/reduce conflict on token REL_EQUAL [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_EQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_EQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_EQUAL
+yac.y: warning: shift/reduce conflict on token REL_NEQUAL [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_NEQUAL Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_NEQUAL
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_NEQUAL
+yac.y: warning: shift/reduce conflict on token REL_LT [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_LT Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_LT
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_LT
+yac.y: warning: shift/reduce conflict on token REL_LEQ [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_LEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_LEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_LEQ
+yac.y: warning: shift/reduce conflict on token REL_GT [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_GT Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_GT
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_GT
+yac.y: warning: shift/reduce conflict on token REL_GEQ [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • REL_GEQ Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression RelationalOperation Expression
+                                               ↳ • REL_GEQ
+  Reduce derivation
+    Expression
+    ↳ Expression                                 RelationalOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ REL_GEQ
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '+' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression AddOperation Expression
+                                               ↳ • '+'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 AddOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '-' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression AddOperation Expression
+                                               ↳ • '-'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 AddOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '-'
+yac.y: warning: shift/reduce conflict on token '|' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '|' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression AddOperation Expression
+                                               ↳ • '|'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 AddOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '|'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '^' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression AddOperation Expression
+                                               ↳ • '^'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 AddOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '*' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • '*'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '*'
+yac.y: warning: shift/reduce conflict on token '/' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '/' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • '/'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '/'
+yac.y: warning: shift/reduce conflict on token '%' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '%' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • '%'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '%'
+yac.y: warning: shift/reduce conflict on token LSHIFT [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • LSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • LSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ LSHIFT
+yac.y: warning: shift/reduce conflict on token RSHIFT [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • RSHIFT Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • RSHIFT
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ RSHIFT
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • '&' Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • '&'
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ '&'
+yac.y: warning: shift/reduce conflict on token AMPXOR [-Wcounterexamples]
+  Example: Expression MultipyOperation Expression • AMPXOR Expression
+  Shift derivation
+    Expression
+    ↳ Expression MultipyOperation Expression
+                                  ↳ Expression MultipyOperation Expression
+                                               ↳ • AMPXOR
+  Reduce derivation
+    Expression
+    ↳ Expression                                 MultipyOperation Expression
+      ↳ Expression MultipyOperation Expression • ↳ AMPXOR
+yac.y: warning: shift/reduce conflict on token SHORT_DECLARATION [-Wcounterexamples]
+time limit exceeded: 6.000000
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' Statements KEYWORD_SWITCH IDENTIFIER • SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')' '{' TypeCaseClauses '}' Statements '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                                                                  $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                                                                      TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ Statements                                                                                                                            Statements '}'
+                                                                               ↳ Statements Statement
+                                                                                            ↳ SwitchStatement
+                                                                                              ↳ TypeSwitchStmt
+                                                                                                ↳ KEYWORD_SWITCH TypeSwitchGuard                                                             '{' TypeCaseClauses '}'
+                                                                                                                 ↳ IDENTIFIER • SHORT_DECLARATION PrimaryExpression '.' '(' KEYWORD_TYPE ')'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements KEYWORD_SWITCH IDENTIFIER • SHORT_DECLARATION ExpressionList '{' ExprCaseClauses '}' '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                                   $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                                       TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                                    '}'
+                                                                                   ↳ Statements Statement
+                                                                                                ↳ SwitchStatement
+                                                                                                  ↳ ExprSwitchStmt
+                                                                                                    ↳ KEYWORD_SWITCH SimpleStatement                                     '{' ExprCaseClauses '}'
+                                                                                                                     ↳ ShortDeclaration
+                                                                                                                       ↳ IdentifierList SHORT_DECLARATION ExpressionList
+                                                                                                                         ↳ IDENTIFIER •
+yac.y: warning: reduce/reduce conflict on token ',' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements KEYWORD_SWITCH IDENTIFIER • ',' IDENTIFIER SHORT_DECLARATION ExpressionList '{' ExprCaseClauses '}' '}' TopLevelDeclarations $end
+  First reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                                                    $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                                                        TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                                                     '}'
+                                                                                   ↳ Statements Statement
+                                                                                                ↳ SwitchStatement
+                                                                                                  ↳ ExprSwitchStmt
+                                                                                                    ↳ KEYWORD_SWITCH SimpleStatement                                                      '{' ExprCaseClauses '}'
+                                                                                                                     ↳ ShortDeclaration
+                                                                                                                       ↳ IdentifierList                  SHORT_DECLARATION ExpressionList
+                                                                                                                         ↳ IdentifierList ',' IDENTIFIER
+                                                                                                                           ↳ IDENTIFIER •
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements KEYWORD_SWITCH IDENTIFIER • ',' Expression '=' ExpressionList '{' ExprCaseClauses '}' '}' TopLevelDeclarations $end
+  Second reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                                                $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                                                    TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                                                 '}'
+                                                                                   ↳ Statements Statement
+                                                                                                ↳ SwitchStatement
+                                                                                                  ↳ ExprSwitchStmt
+                                                                                                    ↳ KEYWORD_SWITCH SimpleStatement                                                  '{' ExprCaseClauses '}'
+                                                                                                                     ↳ Assignment
+                                                                                                                       ↳ ExpressionList                            '=' ExpressionList
+                                                                                                                         ↳ ExpressionList           ',' Expression
+                                                                                                                           ↳ Expression
+                                                                                                                             ↳ UnaryExpression
+                                                                                                                               ↳ PrimaryExpression
+                                                                                                                                 ↳ Operand
+                                                                                                                                   ↳ OperandName
+                                                                                                                                     ↳ IDENTIFIER •
+yac.y: warning: shift/reduce conflict on token '+' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '+' Expression Statement '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                  $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                      TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                   '}'
+                                                                                   ↳ Statements                                                                       Statement
+                                                                                     ↳ Statements Statement
+                                                                                                  ↳ Assignment
+                                                                                                    ↳ Expression AssignOperation Expression
+                                                                                                                                 ↳ Expression AddOperation Expression
+                                                                                                                                              ↳ • '+'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '+' UnaryExpression '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                         $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                             TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                          '}'
+                                                                                   ↳ Statements                                                 Statement
+                                                                                     ↳ Statements Statement                                     ↳ SimpleStatement
+                                                                                                  ↳ SimpleStatement                               ↳ Expression
+                                                                                                    ↳ Assignment                                    ↳ UnaryExpression
+                                                                                                      ↳ Expression AssignOperation Expression •       ↳ UnaryOperation UnaryExpression
+                                                                                                                                                        ↳ '+'
+yac.y: warning: shift/reduce conflict on token '-' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '-' Expression Statement '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                  $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                      TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                   '}'
+                                                                                   ↳ Statements                                                                       Statement
+                                                                                     ↳ Statements Statement
+                                                                                                  ↳ Assignment
+                                                                                                    ↳ Expression AssignOperation Expression
+                                                                                                                                 ↳ Expression AddOperation Expression
+                                                                                                                                              ↳ • '-'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '-' UnaryExpression '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                         $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                             TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                          '}'
+                                                                                   ↳ Statements                                                 Statement
+                                                                                     ↳ Statements Statement                                     ↳ SimpleStatement
+                                                                                                  ↳ SimpleStatement                               ↳ Expression
+                                                                                                    ↳ Assignment                                    ↳ UnaryExpression
+                                                                                                      ↳ Expression AssignOperation Expression •       ↳ UnaryOperation UnaryExpression
+                                                                                                                                                        ↳ '-'
+yac.y: warning: shift/reduce conflict on token '^' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '^' Expression Statement '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                  $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                      TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                   '}'
+                                                                                   ↳ Statements                                                                       Statement
+                                                                                     ↳ Statements Statement
+                                                                                                  ↳ Assignment
+                                                                                                    ↳ Expression AssignOperation Expression
+                                                                                                                                 ↳ Expression AddOperation Expression
+                                                                                                                                              ↳ • '^'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '^' UnaryExpression '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                         $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                             TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                          '}'
+                                                                                   ↳ Statements                                                 Statement
+                                                                                     ↳ Statements Statement                                     ↳ SimpleStatement
+                                                                                                  ↳ SimpleStatement                               ↳ Expression
+                                                                                                    ↳ Assignment                                    ↳ UnaryExpression
+                                                                                                      ↳ Expression AssignOperation Expression •       ↳ UnaryOperation UnaryExpression
+                                                                                                                                                        ↳ '^'
+yac.y: warning: shift/reduce conflict on token '*' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '*' Expression Statement '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                      $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                          TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                       '}'
+                                                                                   ↳ Statements                                                                           Statement
+                                                                                     ↳ Statements Statement
+                                                                                                  ↳ Assignment
+                                                                                                    ↳ Expression AssignOperation Expression
+                                                                                                                                 ↳ Expression MultipyOperation Expression
+                                                                                                                                              ↳ • '*'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '*' UnaryExpression '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                         $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                             TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                          '}'
+                                                                                   ↳ Statements                                                 Statement
+                                                                                     ↳ Statements Statement                                     ↳ SimpleStatement
+                                                                                                  ↳ SimpleStatement                               ↳ Expression
+                                                                                                    ↳ Assignment                                    ↳ UnaryExpression
+                                                                                                      ↳ Expression AssignOperation Expression •       ↳ UnaryOperation UnaryExpression
+                                                                                                                                                        ↳ '*'
+yac.y: warning: shift/reduce conflict on token '&' [-Wcounterexamples]
+  First example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '&' Expression Statement '}' TopLevelDeclarations $end
+  Shift derivation
+    $accept
+    ↳ s                                                                                                                                                                                                      $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                          TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                       '}'
+                                                                                   ↳ Statements                                                                           Statement
+                                                                                     ↳ Statements Statement
+                                                                                                  ↳ Assignment
+                                                                                                    ↳ Expression AssignOperation Expression
+                                                                                                                                 ↳ Expression MultipyOperation Expression
+                                                                                                                                              ↳ • '&'
+  Second example: PackageClause ImportDeclarations KEYWORD_FUNC IDENTIFIER '(' ')' '{' Statements Expression AssignOperation Expression • '&' UnaryExpression '}' TopLevelDeclarations $end
+  Reduce derivation
+    $accept
+    ↳ s                                                                                                                                                                                                         $end
+      ↳ PackageClause ImportDeclarations TopLevelDeclarations
+                                         ↳ TopLevelDeclaration                                                                                                                             TopLevelDeclarations
+                                           ↳ KEYWORD_FUNC IDENTIFIER '(' ')' CodeBlock
+                                                                             ↳ '{' Statements                                                                                          '}'
+                                                                                   ↳ Statements                                                 Statement
+                                                                                     ↳ Statements Statement                                     ↳ SimpleStatement
+                                                                                                  ↳ SimpleStatement                               ↳ Expression
+                                                                                                    ↳ Assignment                                    ↳ UnaryExpression
+                                                                                                      ↳ Expression AssignOperation Expression •       ↳ UnaryOperation UnaryExpression
+                                                                                                                                                        ↳ '&'
