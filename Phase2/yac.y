@@ -1153,16 +1153,24 @@ ExprCaseClauses:
 ;
 
 ExprCaseClause:
-    KEYWORD_CASE Expression 
+    KEYWORD_CASE Expression
     {
-        newlabel(); 
-        fprintf(icfile, "IFFALSE %s GOTO %s\n", $2->loc, label); 
+        newlabel();
+        newtemp();
+        fprintf(icfile, "%s = i == %s\n", temp, $2->loc);
+        fprintf(icfile, "IFFALSE %s GOTO %s\n", temp, label);
         strcpy($<IfNode>$.next, label);
-    }
-    ':' Statements
+    } 
+    ':'
+    Statements
     { 
-        push(&if_cond, $2->loc); fprintf(icfile, "%s:\n", $<IfNode>3.next); 
+        push(&if_cond, $2->loc); 
+        fprintf(icfile, "%s:\n", $<IfNode>3.next); 
     }
+    |
+    KEYWORD_DEFAULT 
+    ':'
+    Statements
 ;
 
 // ExprSwitchCase:

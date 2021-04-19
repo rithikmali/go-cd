@@ -529,7 +529,7 @@ def dead_code_elimination(list_of_lines):
 if( __name__ == '__main__'):
     
     #filename = input("Enter file name: ")
-    filename = 'icg_test2.txt'
+    filename = 'intermediate.txt'
     f = open(filename, 'r')
 
     list_of_lines = f.readlines()

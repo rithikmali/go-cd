@@ -26,13 +26,19 @@ func main() {
 		c=3+1
 	}
     i:=2
-    cas:=0
+    cas:=2
     switch i {
-    case i==1:
+    case 1:
         cas=1
-    case i==2:
+    case 2:
         cas=2
-    case i==3:
+    case 3:
         cas=3
+    case 4+3:
+        cas=4
+    case 5:
+        cas=5
+    case 6:
+        cas=6
     }
 }
