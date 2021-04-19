@@ -1153,13 +1153,23 @@ ExprCaseClauses:
 ;
 
 ExprCaseClause:
-    ExprSwitchCase ':' Statements
+    KEYWORD_CASE Expression 
+    {
+        newlabel(); 
+        fprintf(icfile, "IFFALSE %s GOTO %s\n", $2->loc, label); 
+        strcpy($<IfNode>$.next, label);
+    }
+    ':' Statements
+    { 
+        push(&if_cond, $2->loc); fprintf(icfile, "%s:\n", $<IfNode>3.next); 
+    }
 ;
 
-ExprSwitchCase:
-    KEYWORD_CASE ExpressionList 
-    | KEYWORD_DEFAULT
-;
+// ExprSwitchCase:
+     
+    
+//     | KEYWORD_DEFAULT
+// ;
 
 TypeSwitchStmt:
     KEYWORD_SWITCH TypeSwitchGuard '{' TypeCaseClauses '}'

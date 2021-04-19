@@ -23,17 +23,3 @@ _t6 = 3 + 1
 c = _t6
 GOTO L3
 L1:
-i = 2
-cas = 0
-_t7 = i == 1
-IFFALSE _t7 GOTO L4
-cas = 1
-L4:
-_t8 = i == 2
-IFFALSE _t8 GOTO L5
-cas = 2
-L5:
-_t9 = i == 3
-IFFALSE _t9 GOTO L6
-cas = 3
-L6:

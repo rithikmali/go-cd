@@ -17,45 +17,22 @@ package main
 import "fmt"
 
 func main() {
-    var b, c int = 1, 2
-	b=5
+    var a,b, c int = 1,10, 1
+	b=5+10*20/100
 	aravind:=100
 	aravind=20
-     for i := 1; i < 5; i++ 
-     {
-         var z = "lex"
-        //  const l,m,pqr,lsts,asd= 1.22, "yacc" ,1,1,12
-		 for j := 1; j < 5; j++ 
-		{
-			fmt.Println("I'm a Nested for")	
-			abad:=10		
-		}
-         
-    }
-
+    for c=1;c<10;c++ {
+		a = 4 + 1
+		c=3+1
+	}
+    i:=2
+    cas:=0
     switch i {
-    case 1:
-        fmt.Println("one")
-    case 2:
-        fmt.Println("two")
-    case 3:
-        fmt.Println("three")
-    }
-
-    switch t := ooo.(type) {
-    case bool:
-        fmt.Println("I'm a bool")
-		switch i {
-		case 1:
-			fmt.Println("one")
-		case 2:
-			fmt.Println("two")
-		case 3:
-			fmt.Println("three")
-		}
-    case int:
-        fmt.Println("I'm an int")
-    default:
-        fmt.Printf("Don't know type")
+    case i==1:
+        cas=1
+    case i==2:
+        cas=2
+    case i==3:
+        cas=3
     }
 }
