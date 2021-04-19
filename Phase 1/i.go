@@ -18,13 +18,6 @@ import "fmt"
 
 func main() {
     // var b, c int = 1, 2,12,12
-	aravind:=10
-	// mali:=1
-	// maya:=100
-    var b, c = 1, 2
-    // aravind=12
-	const s string = "constant"
-	// s="Hello"
      for i := 1; i < 5; i++ 
      {
          var z = "lex"

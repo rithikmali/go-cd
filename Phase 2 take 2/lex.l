@@ -17,14 +17,14 @@ decimal_exponent  [eE][+-]?{decimal_digits}
 float_literal ({decimal_digits}"."{decimal_digits}?{decimal_exponent}?)|{decimal_digits}{decimal_exponent}
 
 int_literal 0|([1-9]{digit}*)
-identifier {letter}({letter}|{digit})*
+identifier {letter}({letter}|{decimal_digits})*
 operator_char "+"|"&"|"("|")"|"-"|"|"|"["|"]"|"^"|":"|"."|"{"|"}"|"/"|"*"|"="|","|";"|"%"|"!"
 predeclared_type (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
 predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)
 
-comment       {line_comment}|{block_comment}
 line_comment  "//".*
 block_comment "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/" 
+comment       {line_comment}|{block_comment}
 
 %%
 {whitespace} ;
@@ -92,10 +92,10 @@ block_comment "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/"
 
 {predeclared_type}      {yylval.P_TYPE = strdup(yytext); return P_TYPE;}
 {predeclared_functions} {yylval.P_FUNCTION = strdup(yytext); return P_FUNCTION;}
-{identifier}            {yylval.IDENTIFIER = strdup(yytext); return IDENTIFIER;}  
-\".*\"                  {yylval.STRING_LITERAL = strdup(yytext); return STRING_LITERAL;}
-{int_literal}           {yylval.INT_LITERAL = atoi(yytext); return INT_LITERAL;}
-{float_literal}         {yylval.FLOAT_LITERAL = atof(yytext); return FLOAT_LITERAL;}
+{identifier}            {yylval.IDENTIFIER = strdup(yytext);printf("IDENTIFIER"); return IDENTIFIER;}  
+\".*\"                  {yylval.STRING_LITERAL = strdup(yytext); printf("STRING_LITERAL: %s",yytext);return STRING_LITERAL;}
+{int_literal}           {yylval.INT_LITERAL = atoi(yytext); printf("INT_LITERAL: %s",yytext);return INT_LITERAL;}
+{float_literal}         {yylval.FLOAT_LITERAL = atof(yytext); printf("FLOAT_LITERAL: %s",yytext); return FLOAT_LITERAL;}
 
 
 %%

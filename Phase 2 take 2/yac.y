@@ -349,17 +349,31 @@ void doAssignExisting(Node *lhs, Node *rhs) {
 %token <double> FLOAT_LITERAL
 %token <char const *> IDENTIFIER
 
-%token KEYWORD_PACKAGE
-%token KEYWORD_IMPORT
-%token KEYWORD_FUNC
-%token KEYWORD_CONST
-%token KEYWORD_TYPE
-%token KEYWORD_VAR
-%token KEYWORD_FOR
-%token KEYWORD_RANGE
+%token KEYWORD_BREAK
 %token KEYWORD_DEFAULT
+%token KEYWORD_FUNC
+%token KEYWORD_INTERFACE
+%token KEYWORD_SELECT
 %token KEYWORD_CASE
+%token KEYWORD_DEFER
+%token KEYWORD_GO
+%token KEYWORD_MAP
+%token KEYWORD_STRUCT
+%token KEYWORD_CHAN
+%token KEYWORD_ELSE
+%token KEYWORD_GOTO
+%token KEYWORD_PACKAGE
 %token KEYWORD_SWITCH
+%token KEYWORD_CONST
+%token KEYWORD_FALLTHROUGH
+%token KEYWORD_IF
+%token KEYWORD_RANGE
+%token KEYWORD_TYPE
+%token KEYWORD_CONTINUE
+%token KEYWORD_FOR
+%token KEYWORD_IMPORT
+%token KEYWORD_RETURN
+%token KEYWORD_VAR
 
 %token <char const *> LOGICAL_OR
 %token <char const *> LOGICAL_AND
@@ -513,6 +527,11 @@ ConstSpecifications:
 
 ConstSpecification:
     IdentifierList ConstIdList
+    { 
+        value.op[0] = '='; value.op[1] = 0; 
+        $$ = makeNode(OP, value, $1, $2);
+        doAssign('c', $1, $2->value.n);
+    }
 ;
 
 ConstIdList:
@@ -528,7 +547,7 @@ PreConstIdList:
     {	
         strcpy(Tflag, $1->value.name);
     }
-    | empty %prec EMPTY
+    | %empty %prec EMPTY
 ;
 
 /* Type Declaration */
@@ -564,7 +583,7 @@ TypeDefinition:
 /* Variable Declaration */
 
 VariableDeclaration:
-    KEYWORD_VAR VariableSpecifications
+    KEYWORD_VAR VariableSpecification
     | KEYWORD_VAR '(' VariableSpecifications ')'
     { 
         if(stack_v.top != stack_i.top && stack_v.top != -1)
@@ -634,7 +653,7 @@ VariableIdListType:
     value.n = $2; 
     $$ = makeNode(OP, value, NULL, NULL);
     }
-    | empty %prec EMPTY
+    | %empty %prec EMPTY
     {
         $$ = NULL; 
     }
@@ -722,42 +741,80 @@ ExpressionList:
             }       
         push(&stack_v, result);
         }
-    | Expression ',' ExpressionList
+    | ExpressionList ',' Expression
     { 
-        $$ = makeNode(SEQ, value, $1, $3);
-        switch ($1->type) {
+        $$ = makeNode(SEQ, value, $3, $1);
+
+        switch ($3->type) {
             case INT:
-                sprintf(result, "%d", $3->value.i);
+                sprintf(result, "%d", $1->value.i);
                 push(&stack_t, "int");
                 break;
             case FLOAT:
-                sprintf(result, "%f", $3->value.f);
+                sprintf(result, "%f", $1->value.f);
                 push(&stack_t, "float");
                 break;
             case RUNE:
-                sprintf(result, "%s", $3->value.str);
+                sprintf(result, "%s", $1->value.str);
                 push(&stack_t, "rune");
                 break;
             case STRING:
-                sprintf(result, "%s", $3->value.str);
+                sprintf(result, "%s", $1->value.str);
                 push(&stack_t, "string");
                 break;
             case BOOL:
-                sprintf(result, "%dB", $3->value.b);
+                sprintf(result, "%dB", $1->value.b);
                 push(&stack_t, "bool");
                 break;
-            }
+            }        
         push(&stack_v, result);
-        }
+    }
 ;
 
 Expression:
     Expression LOGICAL_OR Expression
+    {
+        strcpy(value.op, $2);
+        $$ = makeNode(OP, value, $1, $3);
+        newtemp();
+        fprintf(icfile, "%s = %s %s %s\n", temp, $1->loc, value.op, $3->loc);
+        strcpy($$->loc, temp);
+    }
     | Expression LOGICAL_AND Expression
+    {
+        strcpy(value.op, $2);
+        $$ = makeNode(OP, value, $1, $3);
+        newtemp();
+        fprintf(icfile, "%s = %s %s %s\n", temp, $1->loc, value.op, $3->loc);
+        strcpy($$->loc, temp);
+    }
     | Expression RelationalOperation Expression %prec REL_EQUAL
+    {
+        strcpy(value.op, $2->value.op);
+        $$ = makeNode(OP, value, $1, $3);
+        newtemp();
+        fprintf(icfile, "%s = %s %s %s\n", temp, $1->loc, value.op, $3->loc);
+        strcpy($$->loc, temp);
+        printf("While setting: %s\n", $$->loc);
+    }
     | Expression AddOperation Expression %prec '+'
+    {
+		 strcpy(value.op, $2->value.op);
+		 $$ = makeNode(OP, value, $1, $3);
+		 newtemp();
+		 fprintf(icfile, "%s = %s %s %s\n", temp, $1->loc, value.op, $3->loc);
+		 strcpy($$->loc, temp);
+    }
     | Expression MultipyOperation Expression %prec '-'
+    {
+		 strcpy(value.op, $2->value.op);
+		 $$ = makeNode(OP, value, $1, $3);
+		 newtemp();
+		 fprintf(icfile, "%s = %s %s %s\n", temp, $1->loc, value.op, $3->loc);
+		 strcpy($$->loc, temp);
+    }
     | UnaryExpression %prec P_UNARY
+    {$$ = $1;}
 ;
 
 RelationalOperation:
@@ -950,7 +1007,7 @@ CodeBlock:
 
 Statements:
     Statements Statement %prec NORMAL
-    | empty %prec EMPTY
+    | %empty %prec EMPTY
 ;
 
 Statement:
