@@ -1227,7 +1227,7 @@ void yyerror(char const* error) {
 
 int main()
 {
-	icfile = fopen("intermediate.txt", "w");
+	icfile = fopen("code optimization/intermediate.txt", "w");
 	for(int i=0; i<TABLE_SIZE; i++)
 		hashTable[i].hcode = -1;
 

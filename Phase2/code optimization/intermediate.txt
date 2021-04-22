@@ -24,7 +24,7 @@ c = _t6
 GOTO L3
 L1:
 i = 2
-cas = 0
+cas = 2
 _t7 = i == 1
 IFFALSE _t7 GOTO L4
 cas = 1

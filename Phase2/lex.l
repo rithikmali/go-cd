@@ -6,18 +6,18 @@
 // int yylex();
 %}
 %option yylineno
-digit [0-9]
-letter [a-zA-Z_]
+Zero_Nine [0-9]
+a_to_Z [a-zA-Z_]
 
 whitespace [[:space:]]+
 
-decimal_digits {digit}(_?{digit})*
+decimal_digits {Zero_Nine}(_?{Zero_Nine})*
 
 decimal_exponent  [eE][+-]?{decimal_digits}
 float_literal ({decimal_digits}"."{decimal_digits}?{decimal_exponent}?)|{decimal_digits}{decimal_exponent}
 
-int_literal 0|([1-9]{digit}*)
-identifier {letter}({letter}|{decimal_digits})*
+int_literal 0|([1-9]{Zero_Nine}*)
+identifier {a_to_Z}({a_to_Z}|{decimal_digits})*
 operator_char "+"|"&"|"("|")"|"-"|"|"|"["|"]"|"^"|":"|"."|"{"|"}"|"/"|"*"|"="|","|";"|"%"|"!"
 predeclared_type (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
 predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)

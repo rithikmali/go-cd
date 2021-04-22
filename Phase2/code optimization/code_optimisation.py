@@ -2,29 +2,6 @@
 # coding: utf-8
 
 import re
-'''
-Expected o/p:
-
-    icg_test0:    
-        a = x * x
-        f = a + a
-        g = b * f
-        
-    icg_test1:
-        p = a + c
-        r = b * b
-        
-    icg_test2:
-        T6 = 4 * i
-        x = a[T6]
-        T8 = 4 * j
-        T9 = a[T8]
-        a[T6] = T9
-        a[T8] = x
-        goto B2
-
-
-'''
 
 arith_op = ['+','-','*','/']
 logic_op = ['<','>','<=','>=','==','!=']
@@ -38,7 +15,6 @@ is_bool = lambda s: bool(re.match(r"^(true|false)$", s))
 
 def printICG(list_of_lines):
 
-    
     for line in list_of_lines:
         line = line.strip('\n')
         print(line)
@@ -63,37 +39,30 @@ def algebric_identity(tokens):
     if( tokens[3] == '+' ):
         
         if( tokens[2] == '0' ):                    
-            new_line = [tokens[0], '=', tokens[4]]
-            new_line = ' '.join(new_line)
+            new_line = tokens[0] + ' = ' + tokens[4]
                         
         elif( tokens[4] == '0' ):
-            new_line = [tokens[0], '=', tokens[2]]
-            new_line = ' '.join(new_line)
-            
+            new_line = tokens[0] + ' = ' + tokens[2]
+                       
         else:
             new_line = ' '.join(tokens)
             
     elif( tokens[3] == '*' ):
 
         if( tokens[2] == '0' or tokens[4] == '0' ):
-            new_line = [tokens[0], '=', '0']
-            new_line = ' '.join(new_line)
+            new_line = tokens[0] + '=' + '0'
             
         elif( tokens[2] == '1' ):
-            new_line = [tokens[0], '=', tokens[4]]
-            new_line = ' '.join(new_line)
+            new_line = tokens[0] + ' = ' + tokens[4]
             
         elif( tokens[4] == '1' ):
-            new_line = [tokens[0], '=', tokens[2]]
-            new_line = ' '.join(new_line)
+            new_line = tokens[0] + ' = ' + tokens[2]
         
         else:
             new_line = ' '.join(tokens)
             
     elif( tokens[3] == '/' and (tokens[2] == '0' and tokens[3] != '0')):
-        
-        new_line = [tokens[0], '=', '0']
-        new_line = ' '.join(new_line)
+        new_line = tokens[0] + ' = ' + '0'
             
     elif( tokens[3] == '&&'):
         
@@ -278,7 +247,7 @@ def copy_propagation(list_of_lines, comp=[]):
         tokens = line.split(' ')
         
         if( len(tokens) == 3 ):
-            if (tokens[2] not in temp) and                (is_id(tokens[2]) or is_temp(tokens[2])):
+            if (tokens[2] not in temp) and (is_id(tokens[2]) or is_temp(tokens[2])):
                         
                 temp[tokens[0]] = tokens[2]
                 new_line = line

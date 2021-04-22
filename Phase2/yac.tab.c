@@ -2903,7 +2903,7 @@ yyreduce:
     {
         newlabel();
         newtemp();
-        fprintf(icfile, "%s = i==%s\n", temp, (yyvsp[0].Expression)->loc);
+        fprintf(icfile, "%s = i == %s\n", temp, (yyvsp[0].Expression)->loc);
         fprintf(icfile, "IFFALSE %s GOTO %s\n", temp, label);
         strcpy((*(IfNode*)(&yyval)).next, label);
     }
@@ -3163,7 +3163,7 @@ void yyerror(char const* error) {
 
 int main()
 {
-	icfile = fopen("intermediate.txt", "w");
+	icfile = fopen("code optimization/intermediate.txt", "w");
 	for(int i=0; i<TABLE_SIZE; i++)
 		hashTable[i].hcode = -1;
 
