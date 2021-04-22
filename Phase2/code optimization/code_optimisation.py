@@ -13,7 +13,7 @@ is_id = lambda s : bool(re.match(r"^[A-Za-z][A-Za-z0-9_]*$", s))
 is_num = lambda s: bool(re.match(r"^[0-9]*(\.)?[0-9]*$", s))
 is_bool = lambda s: bool(re.match(r"^(true|false)$", s))
 
-def printICG(list_of_lines):
+def print_code(list_of_lines):
 
     for line in list_of_lines:
         line = line.strip('\n')
@@ -21,9 +21,9 @@ def printICG(list_of_lines):
     print()
 
 
-def algebric_identity(tokens):
+def algID(tokens):
     '''
-    Checks if it expr is algebric identity in the ICG
+    Checks if it expression is algebric identity in the ICG
     eg.
     BEFORE:
         T1 = x + 0
@@ -50,7 +50,7 @@ def algebric_identity(tokens):
     elif( tokens[3] == '*' ):
 
         if( tokens[2] == '0' or tokens[4] == '0' ):
-            new_line = tokens[0] + '=' + '0'
+            new_line = tokens[0] + ' = ' + '0'
             
         elif( tokens[2] == '1' ):
             new_line = tokens[0] + ' = ' + tokens[4]
@@ -67,25 +67,22 @@ def algebric_identity(tokens):
     elif( tokens[3] == '&&'):
         
         if(tokens[2] == 'true'):
-            new_line = [tokens[0], '=', tokens[4]]
-            new_line = ' '.join(new_line)
-            
+            new_line = tokens[0]+ ' = ' + tokens[4]
+
         elif(tokens[4] == 'true'):
-            new_line = [tokens[0], '=', tokens[2]]
-            new_line = ' '.join(new_line)
-            
+            new_line = tokens[0]+ ' = '+ tokens[2]
+
         else:
             new_line = ' '.join(tokens)
     
     elif( tokens[3] == '||'):
         
         if(tokens[2] == 'false'):
-            new_line = [tokens[0], '=', tokens[4]]
-            new_line = ' '.join(new_line)
+            new_line = tokens[0]+ ' = '+ tokens[4]
             
         elif(tokens[4] == 'false'):
-            new_line = [tokens[0], '=', tokens[2]]
-            new_line = ' '.join(new_line)
+            new_line = tokens[0] + ' = ' + tokens[2]
+            
         
         else:
             new_line = ' '.join(tokens)
@@ -97,27 +94,27 @@ def algebric_identity(tokens):
 
 
 
-def const_FP(list_of_lines):
+def constantFP(list_of_lines):
     
-    flag1 = 1
-    flag2 = 1
+    val1 = 1
+    val2 = 1
     
-    const_fold_list, flag1 = constant_folding(list_of_lines)
-    const_prop_list, flag2 = constant_propagation(const_fold_list)
+    cf_list, val1 = constantFolding(list_of_lines)
+    cp_list, val2 = constantProp(cf_list)
     
     
-    while( flag1 == 1 or flag2 == 1):
+    while( val1 == 1 or val2 == 1):
         
-        const_fold_list, flag1 = constant_folding(const_prop_list,const_fold_list)
-        const_prop_list, flag2 = constant_propagation(const_fold_list,const_prop_list)
+        cf_list, val1 = constantFolding(cp_list,cf_list)
+        cp_list, val2 = constantProp(cf_list,cp_list)
         
-    return const_prop_list
+    return cp_list
 
 
 
-def constant_folding(list_of_lines, comp=[]):
+def constantFolding(list_of_lines, comp=[]):
     
-    final_list=[]
+    f_list=[]
     for line in list_of_lines:
         line = line.strip('\n')
         tokens = line.split(' ')
@@ -125,39 +122,37 @@ def constant_folding(list_of_lines, comp=[]):
             
             if( (tokens[3] in arith_op) and (is_num(tokens[2]) and is_num(tokens[4])) ):
                 
-                new_line = [tokens[0], '=', str(eval(tokens[2]+tokens[3]+tokens[4]))]
-                new_line = ' '.join(new_line)
-                final_list.append(new_line)
+                new_line = tokens[0]+ ' = '+ str(eval(tokens[2]+tokens[3]+tokens[4]))
+                f_list.append(new_line)
                 
             elif( (tokens[3] in logic_op) and (is_num(tokens[2]) and is_num(tokens[4])) ):
                 
-                new_line = [tokens[0], '=', str(eval(tokens[2]+tokens[3]+tokens[4]))]
-                new_line = ' '.join(new_line)
-                final_list.append(new_line)
+                new_line = tokens[0]+ ' = '+ str(eval(tokens[2]+tokens[3]+tokens[4]))
+                f_list.append(new_line)
          
             else:
                 
                 if ( not (is_id(tokens[2]) and is_id(tokens[4])) ):
-                    new_line = algebric_identity(tokens)
-                    final_list.append(new_line) 
+                    new_line = algID(tokens)
+                    f_list.append(new_line) 
                     
                 else:
-                    final_list.append(line)
+                    f_list.append(line)
         else:
-            final_list.append(line)
+            f_list.append(line)
                     
     if( list_of_lines == comp ):
-        return (final_list, 0)
+        return (f_list, 0)
     else:
-        return (final_list, 1)
+        return (f_list, 1)
 
 
 
-def constant_propagation(list_of_lines,comp=[]):
+def constantProp(list_of_lines,comp=[]):
 
     
     temp = dict()    
-    final_list = []
+    f_list = []
     for line in list_of_lines:
         
         line = line.strip('\n')
@@ -166,13 +161,12 @@ def constant_propagation(list_of_lines,comp=[]):
             
             temp[tokens[0]] = tokens[2]
             new_line = ' '.join(tokens)
-            final_list.append(new_line)
+            f_list.append(new_line)
             
         elif( len(tokens) == 3 and tokens[1] == '=' and tokens[2] in temp ):
             
-            new_line = [tokens[0], '=', temp[tokens[2]]]
-            new_line = ' '.join(new_line)
-            final_list.append(new_line)
+            new_line = tokens[0]+ ' = '+ temp[tokens[2]]
+            f_list.append(new_line)
             
             temp[tokens[0]] = temp[tokens[2]]
                    
@@ -188,21 +182,21 @@ def constant_propagation(list_of_lines,comp=[]):
                 temp.pop(tokens[0])
             
             new_line = ' '.join(tokens)
-            final_list.append(new_line)
+            f_list.append(new_line)
             
         else:
             
-            final_list.append(line)      
+            f_list.append(line)      
     
-    if(final_list == comp):
-        return (final_list, 0)
+    if(f_list == comp):
+        return (f_list, 0)
     else:
-        return (final_list, 1)
+        return (f_list, 1)
     
                 
-def strength_reduction(list_of_lines, comp=[]):
+def strengthRed(list_of_lines, comp=[]):
     
-    final_list = []
+    f_list = []
     for line in list_of_lines:
         
         line = line.strip('\n')
@@ -211,35 +205,32 @@ def strength_reduction(list_of_lines, comp=[]):
         if( len(tokens) == 5 ):
             
             if( tokens[3] == '**' and tokens[4] == '2'):                
-                new_line = [tokens[0], '=', tokens[2], '*', tokens[2]]
-                new_line = ' '.join(new_line)
-                final_list.append(new_line)
+                new_line = tokens[0]+ ' = '+ tokens[2]+ ' * '+ tokens[2]
+                f_list.append(new_line)
                 
             elif( tokens[3] == '*' and tokens[4] == '2'):
-                new_line = [tokens[0], '=', tokens[2], '+', tokens[2]]
-                new_line = ' '.join(new_line)
-                final_list.append(new_line)
+                new_line = tokens[0]+ ' = '+ tokens[2]+ ' + '+ tokens[2]
+                f_list.append(new_line)
             
             elif( tokens[3] == '/' and tokens[4] == '2'):
-                new_line = [tokens[0], '=', tokens[2], '>>', '1']
-                new_line = ' '.join(new_line)
-                final_list.append(new_line)
+                new_line = tokens[0]+ ' = '+ tokens[2]+ ' >> '+ '1'
+                f_list.append(new_line)
                             
             else:
-                final_list.append(line)
+                f_list.append(line)
         else:
-            final_list.append(line)
+            f_list.append(line)
         
     
-    if(final_list == comp):
-        return (final_list, 0)
+    if(f_list == comp):
+        return (f_list, 0)
     else:
-        return (final_list, 1)
+        return (f_list, 1)
                             
             
-def copy_propagation(list_of_lines, comp=[]):
+def copyProp(list_of_lines, comp=[]):
     
-    final_list = []
+    f_list = []
     temp = {}
     for line in list_of_lines:
         
@@ -255,9 +246,6 @@ def copy_propagation(list_of_lines, comp=[]):
             elif( tokens[2] in temp ):
             
                 tokens[2] = temp[tokens[2]]
-#                 new_line = ' '.join(tokens)
-#                 final_list.append(new_line)
-                
                 temp[tokens[0]] = temp[tokens[2]]
                 
             if( '[' in tokens[2] ):
@@ -268,8 +256,6 @@ def copy_propagation(list_of_lines, comp=[]):
                 
                 if( t in temp ):
                     tokens[2] = tokens[2].replace(t, temp[t])
-#                 new_line = ' '.join(tokens)
-#                 final_list.append(new_line)
                 
             if( '[' in tokens[0] ):
                 t = tokens[0]
@@ -278,10 +264,9 @@ def copy_propagation(list_of_lines, comp=[]):
                 
                 if( t in temp ):
                     tokens[0] = tokens[0].replace(t, temp[t])
-#                 new_line = ' '.join(tokens)
-#                 final_list.append(new_line)
+                
             new_line = ' '.join(tokens)
-            final_list.append(new_line)
+            f_list.append(new_line)
                 
         
         elif( len(tokens) == 5 ):
@@ -296,124 +281,25 @@ def copy_propagation(list_of_lines, comp=[]):
                 temp.pop(tokens[0])
             
             new_line = ' '.join(tokens)
-            final_list.append(new_line)
-            
+            f_list.append(new_line)
+        
+        elif( len(tokens) == 4):
+            if ( tokens[1] in temp ):
+                tokens[1] = temp[tokens[1]]
+            new_line = ' '.join(tokens)
+            f_list.append(new_line)
 
         else:    
-            final_list.append(line)
+            f_list.append(line)
     
-    if( final_list == comp ):
-        return (final_list, 0)
+    if( f_list == comp ):
+        return (f_list, 0)
     else:
-        return (final_list, 1)
-
-
-def next_subexpr(list_of_lines, line, line_no):
-    
-    token, expr = line
-    if( '+' in expr ):
-        expr = expr.replace('+', '\+')
-        
-    elif( '*' in expr ):
-        expr = expr.replace('*', '\*')
-    
-    subexpr_list = []
-    for i, line in enumerate(list_of_lines[line_no+1: ]):
-        
-        line = line.strip('\n')
-        if( re.search(expr, line) ):
-            subexpr_list.append(i)
-       
-    
-    for line in list_of_lines[line_no + 1: ]:
-        
-        line = line.strip('\n')
-        tokens = line.split()        
-        if(token in tokens[0] and tokens[1] == '='):
-            match1 = line + '\n'
-            break
-            
-        else:
-            match1 = 'none'
-            
-    t = expr.split(' ')
-    
-    for line in list_of_lines[line_no + 1: ]:
-        
-        line = line.strip('\n')
-        tokens = line.split()        
-        if(t[0] in tokens[0] and tokens[1] == '='):
-            match2 = line + '\n'
-            break
-            
-        else:
-            match2 = 'none'
-    for line in list_of_lines[line_no + 1: ]:
-        
-        line = line.strip('\n')
-        tokens = line.split()        
-        if(t[2] in tokens[0] and tokens[1] == '='):
-            match3 = line + '\n'
-            break
-            
-        else:
-            match3 = 'none'
-            
-    
-    if( match1 == 'none' ):
-        i1 =  len(list_of_lines)
-    else:
-        i1 = list_of_lines[line_no+1: ].index(match1)
-    
-    if( match2 == 'none' ):
-        i2 =  len(list_of_lines)
-    else:
-        i2 = list_of_lines[line_no+1: ].index(match2)
-    
-    if( match3 == 'none' ):
-        i3 =  len(list_of_lines)
-    else:
-        i3 = list_of_lines[line_no+1: ].index(match3)
-    
-    if( i1 <= i2 and i1 <= i3):
-        return subexpr_list, i1
-    elif( i2 <= i1 and i2 <= i3):
-        return subexpr_list, i2
-    else:
-        return subexpr_list, i3
-    
-    
-def common_subexpr_elimination(list_of_lines, comp=[]):
-    
-    final_list = []
-    for i, line in enumerate(list_of_lines):
-        
-        line = line.strip('\n')
-        tokens = line.split(' ')
-        
-        if( len(tokens) == 5 ):
-            expr = line.split(' = ')
-            cmn_exprList, index = next_subexpr(list_of_lines, expr, i)
-            for j in cmn_exprList:
-                if( j >= index ):
-                    break
-                else:
-                    list_of_lines[i + j + 1] = list_of_lines[i + j + 1].replace(expr[1], tokens[0])
-        
-        else:
-            pass
-    
-    final_list, flag = copy_propagation(list_of_lines)
-    
-    if( final_list == comp ):
-        return (final_list, 0)
-    else:
-        return (final_list, 1)
-    
+        return (f_list, 1)
 
     
 
-def var_assign_check(list_of_lines, token, line_no):
+def variableAssgnCheck(list_of_lines, token, line_no):
     
 
     for line in list_of_lines[line_no + 1: ]:
@@ -466,61 +352,73 @@ def var_assign_check(list_of_lines, token, line_no):
     
 
 
-def dead_code_elimination(list_of_lines):
+def deadCodeRemove(list_of_lines):
     
-    final_list = []
+    f_list = []
+    skip_next = False
     for i, line in enumerate(list_of_lines[:-1]):
         
         line = line.strip('\n')
         tokens = line.split()
+        
         if( len(tokens) == 3 and tokens[1] == '=' and (is_num(tokens[2]) or is_bool(tokens[2])) ):
             pass
         
         elif( len(tokens) == 3 and re.match('[a-zA-z]\w*\[[a-zA-Z]\w*\]', tokens[0]) ):
-            final_list.append(line)
+            f_list.append(line)
             
         elif( len(tokens) == 3 and tokens[1] == '=' ):
             
-            flag = var_assign_check(list_of_lines, tokens[0], i)
-            if (flag == 1):
-                 pass
-            else:
-                final_list.append(line)
-        else:
-            final_list.append(line)
+            flag = variableAssgnCheck(list_of_lines, tokens[0], i)
             
-    final_list.append(list_of_lines[-1])
-    
-    return final_list
+            if (flag == 1):
+                pass
+            else:
+                f_list.append(line)
+        
+        else:
+            
+            # if(len(tokens) == 4 and tokens[1]=='True'):
+            #     pass
+            # else:
+                f_list.append(line)
+            
+    f_list.append(list_of_lines[-1])
+    # for i, line in enumerate(f_list[:-1]):
+    #     line = line.strip('\n')
+    #     tokens = line.split()
+    #     if(skip_next):
+    #             pass
+    #     if(len(tokens) == 4 and tokens[1]=='True'):
+    #         line = line.strip('\n')
+    #         tokens = line.split()
+    #             pass
+    #         else:
+    return f_list
 
 
 
 if( __name__ == '__main__'):
     
-    #filename = input("Enter file name: ")
-    filename = 'intermediate.txt'
+    filename = 'icg_test2.txt'
     f = open(filename, 'r')
 
     list_of_lines = f.readlines()
     print('-'*27,"ICG" , '-'*27)
-    printICG(list_of_lines)
+    print_code(list_of_lines)
 
-    sr_list, flagsr = strength_reduction(list_of_lines)
+    sr_list, flagsr = strengthRed(list_of_lines)
     print('-'*17,'Strength Reduction Done', '-'*17)
-    printICG(sr_list)
+    print_code(sr_list)
     
-    fp_list = const_FP(sr_list)        
+    fp_list = constantFP(sr_list)        
     print('-'*5,'Constant Propagation and Constant Folding Done', '-'*5)
-    printICG(fp_list)
+    print_code(fp_list)
 
-    cp_list, flagcp = copy_propagation(fp_list)
+    cp_list, flagcp = copyProp(fp_list)
     print('-'*20,'Copy Propagation Done', '-'*20)
-    printICG(cp_list)
-    
-    cse_list, flagcp = common_subexpr_elimination(cp_list)
-    print('-'*12,'Common Sub-expression Elimination Done', '-'*12)
-    printICG(cse_list)
+    print_code(cp_list)
 
-    dce_list = dead_code_elimination(cse_list)
+    dce_list = deadCodeRemove(cp_list)
     print('-'*19,'Dead Code Elimination Done', '-'*19)
-    printICG(dce_list)
+    print_code(dce_list)

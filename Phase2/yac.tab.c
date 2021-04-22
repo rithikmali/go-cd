@@ -74,340 +74,409 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "common.h"
+#include "server.h"
 union NodeVal value;
 // int yylineno;
-int TABLE_SIZE = 10009;
+int SYMBOL_TABLE_MAX = 1000;
 
-int base = 1000;
+int base = 100;
 int scope_depth = 0;
 int scope_id = 0;
 
-typedef struct symbol_table {
+struct symbolTableStructure {
   char name[31];
-  char dtype[10];
+  char declaredVariableType[10];
   char type;
   char value[20];
   int scope_depth;
   int scope_id;
   int hcode;
-} ST;
-
-ST hashTable[10009];
-
-struct Stack {
-  char s[25][25];
-  int top;
 };
 
-typedef struct queue {
-  char s[25][200];
-  int front;
-	int back;
-} queue;
+struct symbolTableStructure hashTable[1000];
 
-typedef struct Stack stack;
+struct variableStackStructure 
+{
+    int top;
+    char s[25][25];
+};
 
-stack stack_i = {.top = -1};
-stack stack_v = {.top = -1};
-stack stack_t = {.top = -1};
-stack stack_scope = {.top = -1};
-stack if_cond = {.top = -1};
-queue for_loc = {.front = -1, .back = -1};
+struct queue 
+{
+    char s[25][200];
+    int front;
+    int back;
+};
 
-void add(queue *p_st, char *item) {
-	if (p_st->back==199) {
-		printf("Cannot insert into full queue\n");
-		exit(1);
-	}
-	strcpy(p_st->s[++p_st->back], item);
+typedef struct variableStackStructure stack;
+typedef struct queue queue;
+
+int highestIDatLevel[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+stack switchConditionStack = {.top = -1};
+queue forLoopQueue = {.front = -1, .back = -1};
+stack iStack = {.top = -1};
+stack vStack = {.top = -1};
+stack scopeStack = {.top = -1};
+stack tStack = {.top = -1};
+
+char resString[20];
+char tempArray[20] = "";
+int tempVariableCount = 0;
+int labelCount = 0;
+char tempVariableStore[10];
+char labelStore[10];
+FILE* intermediateCodeFile;
+
+char *popFromStack(stack *stackPointer)
+{
+  char *stackItem;
+  stackItem = stackPointer->s[stackPointer->top];
+  stackPointer->top--;
+  return (stackItem);
 }
 
-char *rem(queue *p_st) {
-	if (p_st->front==p_st->back) {
+void pushToStack(stack *stackPointer, char *stackItem)
+{
+  stackPointer->top++;
+  strcpy(stackPointer->s[stackPointer->top], stackItem);
+}
+
+int isStackEmpty(stack st)
+{
+  if(st.top == -1)
+    return 1;
+  else
+    return 0;
+}
+
+void insertToQueue(queue *stackPointer, char *stackItem) 
+{
+	if(stackPointer->back==199)
+    {
+		printf("Error Queue Full\n");
+		exit(1);
+	}
+	strcpy(stackPointer->s[++stackPointer->back], stackItem);
+}
+
+char *removeFromQueue(queue *stackPointer)
+{
+	if(stackPointer->front==stackPointer->back)
+    {
 		printf("Cannot remove from empty queue\n");
 		exit(1);
 	}
-	char *item;
-	item = strdup(p_st->s[++p_st->front]);
-	return (item);
+	char *stackItem;
+	stackItem = strdup(stackPointer->s[++stackPointer->front]);
+	return (stackItem);
 }
 
-char result[20];
-char Tflag[20] = "";
-
-int tid = 0;
-int lid = 0;
-char temp[10];
-char label[10];
-FILE* icfile;
-
-void newtemp() {
-	sprintf(temp, "_t%d", tid++);
-}
-
-void newlabel() {
-	sprintf(label, "L%d", lid++);
-}
-
-int stfull(stack st, int size) {
-  if (st.top >= size - 1)
-    return 1;
-  else
-    return 0;
-}
-
-void push(stack *p_st, char *item) {
-  p_st->top++;
-  strcpy(p_st->s[p_st->top], item);
-}
-
-int stempty(stack st) {
-  if (st.top == -1)
-    return 1;
-  else
-    return 0;
-}
-
-char *pop(stack *p_st) {
-  char *item;
-  item = p_st->s[p_st->top];
-  p_st->top--;
-  return (item);
-}
-
-int hash1(char *token) {
-  int hash = 0;
-  for (int i = 0; token[i] != '\0'; i++) {
-    hash = (256 * hash + token[i]) % 1000000009;
+int firstHashFunction(char *inputToHash)
+{
+  int currValue = 0;
+  for (int i = 0; inputToHash[i] != '\0'; i++)
+  {
+    currValue=(currValue*128+inputToHash[i])%1000000000;
   }
-  hash = hash % TABLE_SIZE;
-  return hash;
+  currValue = currValue % SYMBOL_TABLE_MAX;
+  return currValue;
 }
 
-int check(char *token) {
-  int index1 = hash1(token);
-  int i = 0;
-  while (i < TABLE_SIZE &&
-         !(strcmp(hashTable[(index1 + i) % TABLE_SIZE].name, token) == 0 &&
-				 hashTable[(index1 + i) % TABLE_SIZE].scope_depth == scope_depth &&
-				 hashTable[(index1 + i) % TABLE_SIZE].scope_id == scope_id))
-    i++;
-
-  if (i == TABLE_SIZE)
-    return -1;
-  else
-    return index1 + i;
-}
-
-int check_parent_scopes(char *token) {
-  int index1 = hash1(token);
-  int i = 0;
-  while (i < TABLE_SIZE &&
-         !(strcmp(hashTable[(index1 + i) % TABLE_SIZE].name, token) == 0 &&
-				 (hashTable[(index1 + i) % TABLE_SIZE].scope_depth == scope_depth &&
-				 hashTable[(index1 + i) % TABLE_SIZE].scope_id == scope_id) ||
-				 hashTable[(index1 + i) % TABLE_SIZE].scope_depth < scope_depth))
-    i++;
-
-  if (i == TABLE_SIZE)
-    return -1;
-  else
-    return index1 + i;
-}
-
-void insert(char type, char *token, char *dtype, char *value, int scope_depth, int scope_id) {
-  if (check(token) != -1) {
-    yyerror("variable is redeclared");
-		exit(1);
-  }
-  int index = hash1(token);
-
-  if (hashTable[index].hcode != -1) {
-
-    int i = 1;
-    while (1) {
-      int newIndex = (index + i) % TABLE_SIZE;
-
-      if (hashTable[newIndex].hcode == -1) {
-
-        strcpy(hashTable[newIndex].name, token);
-        strcpy(hashTable[newIndex].dtype, dtype);
-        strcpy(hashTable[newIndex].value, value);
-				hashTable[newIndex].scope_depth = scope_depth;
-				hashTable[newIndex].scope_id = scope_id;
-        hashTable[newIndex].type = type;
-        hashTable[newIndex].hcode = 1;
-        break;
-      }
-      i++;
+int hashTableIndexReturn(char *inputToHash) 
+{
+    int i = 0; int hashIndex = firstHashFunction(inputToHash);
+    while (i < SYMBOL_TABLE_MAX && !(strcmp(hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].name, inputToHash) == 0 && hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].scope_depth == scope_depth && hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].scope_id == scope_id))
+    {
+        i++;
     }
-  }
-  else {
-    strcpy(hashTable[index].name, token);
-    strcpy(hashTable[index].dtype, dtype);
-    strcpy(hashTable[index].value, value);
-		hashTable[index].scope_depth = scope_depth;
-		hashTable[index].scope_id = scope_id;
-    hashTable[index].type = type;
-    hashTable[index].hcode = 1;
-  }
-}
-char *search(char *token) {
-  int index1 = hash1(token);
-  int i = 0;
-  while (i < TABLE_SIZE &&
-         strcmp(hashTable[(index1 + i) % TABLE_SIZE].name, token) != 0)
-    i++;
-  if (i == TABLE_SIZE) {
-		return NULL;
-  } else
-    return hashTable[index1 + i].dtype;
+
+    if(i == SYMBOL_TABLE_MAX)
+    {
+        return -1;
+    }
+    else
+    {
+        return hashIndex + i;
+    }
 }
 
-int max_id_at_depth[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+void appendHashTable(char type, char *inputToHash, char *declaredVariableType, char *value, int scope_depth, int scope_id) 
+{
+    if(hashTableIndexReturn(inputToHash) != -1)
+    {
+        yyerror("Variable is being Redeclared");
+        exit(1);
+    }
+    int hashIndex223 = firstHashFunction(inputToHash);
 
-int next_id(int scope_depth) {
-	int scope_id = -1;
-	if (scope_depth == 1) {
-		scope_id = 1;
-	} else {
-		scope_id = ++max_id_at_depth[scope_depth];
-	}
-	return scope_id;
+    if(hashTable[hashIndex223].hcode != -1)
+    {
+        int i = 1;
+        while(69)
+        {
+            int newIndex = (hashIndex223 + i) % SYMBOL_TABLE_MAX;
+
+            if(hashTable[newIndex].hcode == -1)
+            {
+                strcpy(hashTable[newIndex].name, inputToHash);
+                strcpy(hashTable[newIndex].declaredVariableType, declaredVariableType);
+                strcpy(hashTable[newIndex].value, value);
+                hashTable[newIndex].scope_depth = scope_depth;
+                hashTable[newIndex].scope_id = scope_id;
+                hashTable[newIndex].type = type;
+                hashTable[newIndex].hcode = 1;
+                break;
+            }
+            i++;
+        }
+    }
+    else
+    {
+        strcpy(hashTable[hashIndex223].name, inputToHash);
+        strcpy(hashTable[hashIndex223].declaredVariableType, declaredVariableType);
+        strcpy(hashTable[hashIndex223].value, value);
+        hashTable[hashIndex223].scope_depth = scope_depth;
+        hashTable[hashIndex223].scope_id = scope_id;
+        hashTable[hashIndex223].type = type;
+        hashTable[hashIndex223].hcode = 1;
+    }
+}
+char *findFromHashTable(char *inputToHash)
+{
+    int i = 0;
+    int hashIndex = firstHashFunction(inputToHash);
+    while (i < SYMBOL_TABLE_MAX && strcmp(hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].name, inputToHash) != 0)
+    {
+        i++;
+    }
+    if(i == SYMBOL_TABLE_MAX)
+    {
+        return NULL;
+    } 
+    else
+    {
+        return hashTable[hashIndex + i].declaredVariableType;
+    }
 }
 
-int restore_id(int scope_depth) {
-	int scope_id = -1;
-	if (scope_depth == 1) {
-		scope_id = 1;
-	} else {
-		scope_id = max_id_at_depth[scope_depth];
-	}
-	return scope_id;
-}
-
-void update(char *token, char *dtype, char *value) {
-  int index = check_parent_scopes(token);
-  if (index == -1) {
-		char error[100];
-		printf("In here\n");
-		sprintf(error, "%s is not defined", token);
-    yyerror(error);
+void updateHashTable(char *inputToHash, char *declaredVariableType, char *value) 
+{
+    int hashIndex223 = scopeOfParentCheck(inputToHash);
+    if(hashIndex223 == -1) 
+    {
+        char ErrorMessage[100];
+        // printf("In here\n");
+        sprintf(ErrorMessage, "%s Variable undefined", inputToHash);
+    yyerror(ErrorMessage);
     exit(1);
-  }
+    }
 
-  if (hashTable[index].type == 'c') {
-		char error[100];
-		sprintf(error, "cannot assign to %s (declared const)", token);
-		yyerror(error);
-    exit(1);
-  } else {
-    if (strcmp(hashTable[index].value, "NULL") != 0)
-      strcpy(hashTable[index].value, value);
-    if (strcmp(hashTable[index].dtype, "NULL") != 0)
-      strcpy(hashTable[index].dtype, dtype);
-  }
+    if(hashTable[hashIndex223].type == 'c') 
+    {
+        char ErrorMessage[100];
+        sprintf(ErrorMessage, "Connot Assign to %s it is a Constant Variable", inputToHash);
+        yyerror(ErrorMessage);
+        exit(1);
+    } 
+    else 
+    {
+        if(strcmp(hashTable[hashIndex223].value, "NULL") != 0)
+        {
+            strcpy(hashTable[hashIndex223].value, value);
+        }
+        if(strcmp(hashTable[hashIndex223].declaredVariableType, "NULL") != 0)
+        {
+            strcpy(hashTable[hashIndex223].declaredVariableType, declaredVariableType);
+        }
+    }
 }
 
-void disp_symtbl() {
-  int base = 1000;
-  printf("%s\t\t%s\t\t%s\t\t%s\t\t%s\n", "Name", "Data Type", "Value",
-         "Scope Depth", "Scope ID");
-
-  for (int i = 0; i < TABLE_SIZE; i++) {
-    if (hashTable[i].hcode != -1)
-      printf("%s\t\t%s\t\t\t%s\t\t%d\t\t%d\n", hashTable[i].name,
-             hashTable[i].dtype, hashTable[i].value,
-             hashTable[i].scope_depth, hashTable[i].scope_id);
-  }
-}
-
-void doAssign(char decltype, Node *lhs, Node *rhs) {
-	if (lhs==NULL && rhs==NULL) {
-		Tflag[0] = 0;
+void PresentIdentifierAssignment(Node *LeftHandSide, Node *RightHandSide)
+{	
+	if(LeftHandSide==NULL && RightHandSide==NULL)
+    {
 		return;
 	}
-	if (seqLen(lhs) != seqLen(rhs) && seqLen(rhs) != 0) {
-		yyerror("Imbalanced assignment");
+	if(seqLen(LeftHandSide) != seqLen(RightHandSide))
+    {
+		yyerror("Unequal Length on LHS and RHS");
 		exit(1);
-	} else {
-		if (seqLen(rhs) == 0){
-			insert(decltype, pop(&stack_i), Tflag, "NULL", scope_depth, scope_id);
-			doAssign(decltype, lhs->rop, rhs);
-		} else {
-			if (Tflag[0] != 0) {
-				if (strcmp(pop(&stack_t),Tflag) != 0) {
-					yyerror("Mismatch between declared type and assigned value");
-					exit(1);
-				}
-				insert(decltype, pop(&stack_i), Tflag, pop(&stack_v), scope_depth, scope_id);
-			} else {
-				insert(decltype, pop(&stack_i), pop(&stack_t), pop(&stack_v), scope_depth, scope_id);
-			}
-		}
-		fprintf(icfile, "%s = %s\n", lhs->lop->value.name, rhs->lop->loc);
-		doAssign(decltype, lhs->rop, rhs->rop);
-	} 
-}
-
-void doAssignExisting(Node *lhs, Node *rhs) {	
-	if (lhs==NULL && rhs==NULL) {
-		return;
 	}
-	if (seqLen(lhs) != seqLen(rhs)) {
-		yyerror("Imbalanced assignment");
-		exit(1);
-	} else {
-		char* res = search(lhs->lop->value.name);
-		if (res==NULL) {
-			char error[100];
-			sprintf(error, "%s is not defined", lhs->lop->value.name);
-			yyerror(error);
+    else
+    {
+		char* resultFromHash = findFromHashTable(LeftHandSide->lop->value.name);
+		if(resultFromHash==NULL)
+        {
+			char ErrorMessage[100];
+			sprintf(ErrorMessage, "%s Variable is not Defined", LeftHandSide->lop->value.name);
+			yyerror(ErrorMessage);
 			exit(1);
 		}
-		strcpy(result, res);
+		strcpy(resString, resultFromHash);
 
-		Node *cur = rhs->lop;
-		while(cur->type == OP) {
+		Node *cur = RightHandSide->lop;
+		while(cur->type == OP)
+        {
 			cur = cur->lop;
 		}
 		int type = cur->type;
 		union NodeVal value = cur->value;
-		if(cur->type == ID) {
-			char *decltype = search(cur->value.name);
-			if(decltype==NULL) {
-				char error[100];
-				sprintf(error, "%s is not defined", lhs->lop->value.name);
-				yyerror(error);
+		if(cur->type == ID)
+        {
+			char *declaredType = findFromHashTable(cur->value.name);
+			if(declaredType==NULL)
+            {
+				char ErrorMessage[100];
+				sprintf(ErrorMessage, "%s Variable is not Defined", LeftHandSide->lop->value.name);
+				yyerror(ErrorMessage);
 				exit(1);
 			}
 		}
-		printf("%s %d\n", result, type);
-		if(strcmp(result, "int") == 0 && type == INT) {
-			sprintf(result, "%d", value.i);
-			update(lhs->lop->value.name, "int", result);
-		} else if(strcmp(result, "float") == 0 && type == FLOAT) {
-			sprintf(result, "%f", value.f);
-			update(lhs->lop->value.name, "float", result);
-		} else if(strcmp(result, "string") == 0 && type == STRING) {
-			update(lhs->lop->value.name, "string", value.str);
-		} else if(strcmp(result, "rune") == 0 && type == RUNE) {
-			update(lhs->lop->value.name, "rune", value.str);
-		} else if(strcmp(result, "bool") == 0 && type == BOOL) {
-			sprintf(result, "%dB", value.b);
-			update(lhs->lop->value.name, "bool", result);
-		} else {
+		// printf("%s %d\n", resString, type);
+		if(strcmp(resString, "int") == 0 && type == INT)
+        {
+			sprintf(resString, "%d", value.i);
+			updateHashTable(LeftHandSide->lop->value.name, "int", resString);
+		} 
+        else if(strcmp(resString, "float") == 0 && type == FLOAT)
+        {
+			sprintf(resString, "%f", value.f);
+			updateHashTable(LeftHandSide->lop->value.name, "float", resString);
+		}
+        else if(strcmp(resString, "string") == 0 && type == STRING)
+        {
+			updateHashTable(LeftHandSide->lop->value.name, "string", value.str);
+		}
+        else if(strcmp(resString, "rune") == 0 && type == RUNE)
+        {
+			updateHashTable(LeftHandSide->lop->value.name, "rune", value.str);
+		}
+        else if(strcmp(resString, "bool") == 0 && type == BOOL)
+        {
+			sprintf(resString, "%dB", value.b);
+			updateHashTable(LeftHandSide->lop->value.name, "bool", resString);
+		}
+        else
+        {
 			yyerror("Error: type mismatched assignment");
 			exit(1);
 		}
-		fprintf(icfile, "%s = %s\n", lhs->lop->value.name, rhs->lop->loc);
+		fprintf(intermediateCodeFile, "%s = %s\n", LeftHandSide->lop->value.name, RightHandSide->lop->loc);
 	}
-	doAssignExisting(lhs->rop, rhs->rop);
+	PresentIdentifierAssignment(LeftHandSide->rop, RightHandSide->rop);
+}
+
+void IdentifierAssignment(char declaredType, Node *LeftHandSide, Node *RightHandSide)
+{
+	if(LeftHandSide==NULL && RightHandSide==NULL)
+    {
+		tempArray[0] = 0;
+		return;
+	}
+	if(seqLen(LeftHandSide) != seqLen(RightHandSide) && seqLen(RightHandSide) != 0)
+    {
+		yyerror("Unequal Length on LHS and RHS");
+		exit(1);
+	}
+    else
+    {
+		if(seqLen(RightHandSide) == 0)
+        {
+			appendHashTable(declaredType, popFromStack(&iStack), tempArray, "NULL", scope_depth, scope_id);
+			IdentifierAssignment(declaredType, LeftHandSide->rop, RightHandSide);
+		}
+        else
+        {
+			if(tempArray[0] != 0)
+            {
+				if(strcmp(popFromStack(&tStack),tempArray) != 0)
+                {
+					yyerror("Declared type and Assigned value have conflicting types");
+					exit(1);
+				}
+				appendHashTable(declaredType, popFromStack(&iStack), tempArray, popFromStack(&vStack), scope_depth, scope_id);
+			}
+            else
+            {
+				appendHashTable(declaredType, popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
+			}
+		}
+		fprintf(intermediateCodeFile, "%s = %s\n", LeftHandSide->lop->value.name, RightHandSide->lop->loc);
+		IdentifierAssignment(declaredType, LeftHandSide->rop, RightHandSide->rop);
+	} 
+}
+
+int getNextScope(int scope_depth)
+{
+	int scope_id = -1;
+	if(scope_depth == 1)
+    {
+		scope_id = 1;
+	} else
+    {
+		scope_id = ++highestIDatLevel[scope_depth];
+	}
+	return scope_id;
+}
+
+int getPreviousScope(int scope_depth)
+{
+	int scope_id = -1;
+	if(scope_depth == 1)
+    {
+		scope_id = 1;
+	} 
+    else
+    {
+		scope_id = highestIDatLevel[scope_depth];
+	}
+	return scope_id;
+}
+
+int scopeOfParentCheck(char *inputToHash) 
+{
+    int i = 0;
+    int hashIndex = firstHashFunction(inputToHash);
+    while (i < SYMBOL_TABLE_MAX && !(strcmp(hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].name, inputToHash) == 0 && (hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].scope_depth == scope_depth && hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].scope_id == scope_id) || hashTable[(hashIndex + i) % SYMBOL_TABLE_MAX].scope_depth < scope_depth))
+    {
+        i++;
+    }
+
+    if(i == SYMBOL_TABLE_MAX)
+    {
+        return -1;
+    }
+    else
+    {
+        return hashIndex + i;
+    }
+}
+
+void createTempVariable()
+{
+	sprintf(tempVariableStore, "_t%d", tempVariableCount++);
+}
+
+void createLabel()
+{
+	sprintf(labelStore, "L%d", labelCount++);
+}
+
+void displaySymbolTable()
+{
+    printf("%s\t|\t%s\t|\t%s\t|\t%s\t|\t%s\t|\n", "Name", "Data Type", "Value","Scope Depth", "Scope ID");
+    int base = 100;
+    for(int i=0;i<SYMBOL_TABLE_MAX;i++) 
+    {
+        if(hashTable[i].hcode != -1)
+        {
+            printf("%s\t|\t%s\t\t|\t%s\t|\t%d\t\t|\t%d\t\t|\n", hashTable[i].name, hashTable[i].declaredVariableType, hashTable[i].value, hashTable[i].scope_depth, hashTable[i].scope_id);
+        }
+    }
 }
 
 
-#line 411 "yac.tab.c"
+#line 480 "yac.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -638,7 +707,7 @@ union YYSTYPE
   struct node * OperandName;
   /* Assignment  */
   struct node * Assignment;
-#line 642 "yac.tab.c"
+#line 711 "yac.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -1020,24 +1089,24 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   432,   432,   445,   451,   452,   456,   457,   461,   465,
-     466,   470,   471,   472,   477,   478,   482,   483,   487,   488,
-     489,   494,   495,   524,   525,   529,   538,   546,   550,   556,
-     560,   561,   565,   566,   570,   571,   575,   579,   586,   587,
-     614,   615,   619,   638,   643,   651,   656,   663,   669,   681,
-     685,   692,   697,   704,   717,   744,   775,   783,   791,   800,
-     808,   816,   821,   823,   825,   827,   829,   831,   836,   838,
-     840,   842,   847,   849,   851,   853,   855,   857,   859,   865,
-     867,   869,   871,   873,   875,   880,   882,   884,   886,   888,
-     890,   892,   894,   896,   898,   900,   905,   907,   916,   924,
-     928,   932,   936,   940,   944,   948,   950,   955,   962,   966,
-     970,   977,   981,   985,   996,  1001,   995,  1009,  1010,  1014,
-    1015,  1016,  1017,  1021,  1022,  1023,  1024,  1028,  1032,  1039,
-    1046,  1054,  1064,  1069,  1063,  1080,  1081,  1082,  1083,  1087,
-    1095,  1098,  1100,  1094,  1109,  1110,  1114,  1118,  1119,  1123,
-    1127,  1131,  1135,  1136,  1137,  1143,  1144,  1148,  1151,  1152,
-    1157,  1156,  1171,  1183,  1187,  1188,  1192,  1193,  1197,  1201,
-    1202,  1206,  1207,  1210
+       0,   504,   504,   513,   519,   520,   524,   525,   529,   533,
+     534,   538,   539,   540,   545,   546,   550,   551,   555,   556,
+     557,   562,   563,   592,   593,   597,   606,   614,   618,   624,
+     628,   629,   633,   634,   638,   639,   643,   647,   654,   655,
+     682,   683,   687,   705,   710,   718,   723,   730,   736,   748,
+     752,   759,   764,   771,   784,   811,   842,   850,   858,   867,
+     875,   883,   888,   892,   896,   900,   904,   908,   915,   919,
+     923,   927,   934,   938,   942,   946,   950,   954,   958,   966,
+     970,   974,   978,   982,   986,   993,   997,  1001,  1005,  1009,
+    1013,  1017,  1021,  1025,  1029,  1033,  1040,  1042,  1051,  1059,
+    1063,  1067,  1071,  1075,  1079,  1083,  1085,  1090,  1097,  1101,
+    1105,  1112,  1116,  1120,  1131,  1136,  1130,  1144,  1145,  1149,
+    1150,  1151,  1152,  1156,  1157,  1158,  1159,  1163,  1167,  1174,
+    1181,  1189,  1199,  1204,  1198,  1215,  1216,  1217,  1218,  1222,
+    1230,  1233,  1235,  1229,  1244,  1245,  1249,  1253,  1254,  1258,
+    1262,  1266,  1270,  1271,  1272,  1278,  1279,  1283,  1286,  1287,
+    1292,  1291,  1306,  1312,  1316,  1317,  1321,  1322,  1326,  1330,
+    1331,  1335,  1336,  1339
 };
 #endif
 
@@ -2094,215 +2163,210 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 433 "yac.y"
+#line 505 "yac.y"
     {
-        if(yychar != YYEOF) 
-        {
-            printf("Invalid - reached start symbol before EOF\n"); YYERROR;
-        }
         printf("Parsing Successful. The given Code is Valid\n"); 
         YYACCEPT;
     }
-#line 2107 "yac.tab.c"
+#line 2172 "yac.tab.c"
     break;
 
   case 22:
-#line 496 "yac.y"
+#line 564 "yac.y"
     {
-        if(stack_v.top != stack_i.top && stack_v.top != -1) 
+        if(vStack.top != iStack.top && vStack.top != -1) 
         {
-            yyerror("Imbalanced assignment");
+            yyerror("Unequal Length on LHS and RHS");
             YYERROR;
         }
         else 
         {
-            if(stack_v.top == -1)
+            if(vStack.top == -1)
             {
-                while(!stempty(stack_i))
+                while(!isStackEmpty(iStack))
                 {
-                    insert('c', pop(&stack_i), pop(&stack_t), "NULL", scope_depth, scope_id);
+                    appendHashTable('c', popFromStack(&iStack), popFromStack(&tStack), "NULL", scope_depth, scope_id);
                 }
             }
             else 
             {
-                while(!stempty(stack_i)) 
+                while(!isStackEmpty(iStack)) 
                 {
 
-                    insert('c', pop(&stack_i), pop(&stack_t), pop(&stack_v), scope_depth, scope_id);
+                    appendHashTable('c', popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
                 }
             }
         }  
     }
-#line 2137 "yac.tab.c"
+#line 2202 "yac.tab.c"
     break;
 
   case 25:
-#line 530 "yac.y"
+#line 598 "yac.y"
     { 
         value.op[0] = '='; value.op[1] = 0; 
         (yyval.ConstSpecification) = makeNode(OP, value, (yyvsp[-1].IdentifierList), (yyvsp[0].ConstIdList));
-        doAssign('c', (yyvsp[-1].IdentifierList), (yyvsp[0].ConstIdList)->value.n);
-    }
-#line 2147 "yac.tab.c"
-    break;
-
-  case 26:
-#line 539 "yac.y"
-    {	
-        value.n = (yyvsp[0].ExpressionList); 
-        (yyval.ConstIdList) = makeNode(OP, value, NULL, NULL);
-    }
-#line 2156 "yac.tab.c"
-    break;
-
-  case 27:
-#line 547 "yac.y"
-    {	
-        strcpy(Tflag, (yyvsp[0].Type)->value.name);
-    }
-#line 2164 "yac.tab.c"
-    break;
-
-  case 39:
-#line 588 "yac.y"
-    { 
-        if(stack_v.top != stack_i.top && stack_v.top != -1)
-        {
-            yyerror("Imbalanced assignment");
-            YYERROR;
-        }
-        else 
-        {
-            if (stack_v.top == -1){
-                while(!stempty(stack_i))
-                {
-                    insert('v', pop(&stack_i), Tflag, "NULL", scope_depth, scope_id);
-                }
-            }
-            else 
-            {
-                while(!stempty(stack_i))
-                {
-                    insert('v', pop(&stack_i), pop(&stack_t), pop(&stack_v), scope_depth, scope_id);
-                }
-            }
-        } 
-    }
-#line 2192 "yac.tab.c"
-    break;
-
-  case 42:
-#line 620 "yac.y"
-    { 
-        if((yyvsp[0].VariableIdList)) 
-        {
-            value.op[0] = '='; value.op[1] = 0; 
-            printf("Outside function: %d %d\n", seqLen((yyvsp[-1].IdentifierList)), seqLen((yyvsp[0].VariableIdList)->value.n));
-            (yyval.VariableSpecification) = makeNode(OP, value, (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList));
-            doAssign('v', (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList)->value.n);
-        } 
-        else {
-            (yyval.VariableSpecification) = NULL;
-            printf("Beginning with assign\n");
-            doAssign('v', (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList));
-            printf("Done with assign\n");
-        }
+        IdentifierAssignment('c', (yyvsp[-1].IdentifierList), (yyvsp[0].ConstIdList)->value.n);
     }
 #line 2212 "yac.tab.c"
     break;
 
-  case 43:
-#line 639 "yac.y"
+  case 26:
+#line 607 "yac.y"
     {	
-    (yyval.VariableIdList) = (yyvsp[0].VariableIdListType);
-    strcpy(Tflag, (yyvsp[-1].Type)->value.name);
+        value.n = (yyvsp[0].ExpressionList); 
+        (yyval.ConstIdList) = makeNode(OP, value, NULL, NULL);
     }
 #line 2221 "yac.tab.c"
     break;
 
-  case 44:
-#line 644 "yac.y"
+  case 27:
+#line 615 "yac.y"
     {	
-    value.n = (yyvsp[0].ExpressionList); 
-    (yyval.VariableIdList) = makeNode(OP, value, NULL, NULL);
+        strcpy(tempArray, (yyvsp[0].Type)->value.name);
     }
-#line 2230 "yac.tab.c"
+#line 2229 "yac.tab.c"
     break;
 
-  case 45:
-#line 652 "yac.y"
-    {	
-    value.n = (yyvsp[0].ExpressionList); 
-    (yyval.VariableIdListType) = makeNode(OP, value, NULL, NULL);
-    }
-#line 2239 "yac.tab.c"
-    break;
-
-  case 46:
-#line 657 "yac.y"
-    {
-        (yyval.VariableIdListType) = NULL; 
-    }
-#line 2247 "yac.tab.c"
-    break;
-
-  case 47:
-#line 664 "yac.y"
-    {	
-        strcpy(value.name, (yyvsp[0].IDENTIFIER)); 
-        (yyval.IdentifierList) = makeNode(SEQ, value, makeNode(ID, value, NULL, NULL), NULL); 
-        push(&stack_i, value.name);
+  case 39:
+#line 656 "yac.y"
+    { 
+        if(vStack.top != iStack.top && vStack.top != -1)
+        {
+            yyerror("Unequal Length on LHS and RHS");
+            YYERROR;
+        }
+        else 
+        {
+            if(vStack.top == -1){
+                while(!isStackEmpty(iStack))
+                {
+                    appendHashTable('v', popFromStack(&iStack), tempArray, "NULL", scope_depth, scope_id);
+                }
+            }
+            else 
+            {
+                while(!isStackEmpty(iStack))
+                {
+                    appendHashTable('v', popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
+                }
+            }
+        } 
     }
 #line 2257 "yac.tab.c"
     break;
 
-  case 48:
-#line 670 "yac.y"
-    {
-	
-	    strcpy(value.name, (yyvsp[-2].IDENTIFIER)); 
-		(yyval.IdentifierList) = makeNode(SEQ, value, makeNode(ID, value, NULL, NULL), (yyvsp[0].IdentifierList));
-		push(&stack_i, value.name);
-
+  case 42:
+#line 688 "yac.y"
+    { 
+        if((yyvsp[0].VariableIdList)) 
+        {
+            value.op[0] = '='; value.op[1] = 0; 
+            // printf("Outside function: %d %d\n", seqLen($1), seqLen($2->value.n));
+            (yyval.VariableSpecification) = makeNode(OP, value, (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList));
+            IdentifierAssignment('v', (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList)->value.n);
+        } 
+        else {
+            (yyval.VariableSpecification) = NULL;
+            IdentifierAssignment('v', (yyvsp[-1].IdentifierList), (yyvsp[0].VariableIdList));
+            // printf("Done with assign\n");
+        }
     }
-#line 2269 "yac.tab.c"
+#line 2276 "yac.tab.c"
     break;
 
-  case 49:
-#line 682 "yac.y"
-    {
-        (yyval.Type)=(yyvsp[0].TypeName);
-    }
-#line 2277 "yac.tab.c"
-    break;
-
-  case 50:
-#line 686 "yac.y"
-    {
-        (yyval.Type)=(yyvsp[-1].Type);
+  case 43:
+#line 706 "yac.y"
+    {	
+    (yyval.VariableIdList) = (yyvsp[0].VariableIdListType);
+    strcpy(tempArray, (yyvsp[-1].Type)->value.name);
     }
 #line 2285 "yac.tab.c"
     break;
 
-  case 51:
-#line 693 "yac.y"
-    {
-        strcpy(value.name,(yyvsp[0].P_TYPE));
-        (yyval.TypeName) = makeNode(ID,value,NULL,NULL);
+  case 44:
+#line 711 "yac.y"
+    {	
+    value.n = (yyvsp[0].ExpressionList); 
+    (yyval.VariableIdList) = makeNode(OP, value, NULL, NULL);
     }
 #line 2294 "yac.tab.c"
     break;
 
+  case 45:
+#line 719 "yac.y"
+    {	
+    value.n = (yyvsp[0].ExpressionList); 
+    (yyval.VariableIdListType) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2303 "yac.tab.c"
+    break;
+
+  case 46:
+#line 724 "yac.y"
+    {
+        (yyval.VariableIdListType) = NULL; 
+    }
+#line 2311 "yac.tab.c"
+    break;
+
+  case 47:
+#line 731 "yac.y"
+    {	
+        strcpy(value.name, (yyvsp[0].IDENTIFIER)); 
+        (yyval.IdentifierList) = makeNode(SEQ, value, makeNode(ID, value, NULL, NULL), NULL); 
+        pushToStack(&iStack, value.name);
+    }
+#line 2321 "yac.tab.c"
+    break;
+
+  case 48:
+#line 737 "yac.y"
+    {
+	
+	    strcpy(value.name, (yyvsp[-2].IDENTIFIER)); 
+		(yyval.IdentifierList) = makeNode(SEQ, value, makeNode(ID, value, NULL, NULL), (yyvsp[0].IdentifierList));
+		pushToStack(&iStack, value.name);
+
+    }
+#line 2333 "yac.tab.c"
+    break;
+
+  case 49:
+#line 749 "yac.y"
+    {
+        (yyval.Type)=(yyvsp[0].TypeName);
+    }
+#line 2341 "yac.tab.c"
+    break;
+
+  case 50:
+#line 753 "yac.y"
+    {
+        (yyval.Type)=(yyvsp[-1].Type);
+    }
+#line 2349 "yac.tab.c"
+    break;
+
+  case 51:
+#line 760 "yac.y"
+    {
+        strcpy(value.name,(yyvsp[0].P_TYPE));
+        (yyval.TypeName) = makeNode(ID,value,NULL,NULL);
+    }
+#line 2358 "yac.tab.c"
+    break;
+
   case 52:
-#line 698 "yac.y"
+#line 765 "yac.y"
     {
         (yyval.TypeName) = (yyvsp[0].QualifiedID);
     }
-#line 2302 "yac.tab.c"
+#line 2366 "yac.tab.c"
     break;
 
   case 53:
-#line 705 "yac.y"
+#line 772 "yac.y"
     {	
         value.name[0] = 0; 
         strcat(value.name, (yyvsp[-2].IDENTIFIER)); 
@@ -2310,617 +2374,685 @@ yyreduce:
         strcat(value.name, (yyvsp[0].IDENTIFIER)); 
         (yyval.QualifiedID) = makeNode(ID, value, NULL, NULL);
     }
-#line 2314 "yac.tab.c"
+#line 2378 "yac.tab.c"
     break;
 
   case 54:
-#line 718 "yac.y"
+#line 785 "yac.y"
     {	
         (yyval.ExpressionList) = makeNode(SEQ, value, (yyvsp[0].Expression), NULL);  
         switch ((yyvsp[0].Expression)->type) {
             case INT:
-                sprintf(result, "%d", (yyvsp[0].Expression)->value.i);
-                push(&stack_t, "int");
+                sprintf(resString, "%d", (yyvsp[0].Expression)->value.i);
+                pushToStack(&tStack, "int");
                 break;
             case FLOAT:
-                sprintf(result, "%f", (yyvsp[0].Expression)->value.f);
-                push(&stack_t, "float");
+                sprintf(resString, "%f", (yyvsp[0].Expression)->value.f);
+                pushToStack(&tStack, "float");
                 break;
             case RUNE:
-                sprintf(result, "%s", (yyvsp[0].Expression)->value.str);
-                push(&stack_t, "rune");
+                sprintf(resString, "%s", (yyvsp[0].Expression)->value.str);
+                pushToStack(&tStack, "rune");
                 break;
             case STRING:
-                sprintf(result, "%s", (yyvsp[0].Expression)->value.str);
-                push(&stack_t, "string");
+                sprintf(resString, "%s", (yyvsp[0].Expression)->value.str);
+                pushToStack(&tStack, "string");
                 break;
             case BOOL:
-                sprintf(result, "%dB", (yyvsp[0].Expression)->value.b);
-                push(&stack_t, "bool");
+                sprintf(resString, "%dB", (yyvsp[0].Expression)->value.b);
+                pushToStack(&tStack, "bool");
                 break;
             }       
-        push(&stack_v, result);
+        pushToStack(&vStack, resString);
         }
-#line 2345 "yac.tab.c"
+#line 2409 "yac.tab.c"
     break;
 
   case 55:
-#line 745 "yac.y"
+#line 812 "yac.y"
     { 
         (yyval.ExpressionList) = makeNode(SEQ, value, (yyvsp[0].Expression), (yyvsp[-2].ExpressionList));
 
         switch ((yyvsp[0].Expression)->type) {
             case INT:
-                sprintf(result, "%d", (yyvsp[-2].ExpressionList)->value.i);
-                push(&stack_t, "int");
+                sprintf(resString, "%d", (yyvsp[-2].ExpressionList)->value.i);
+                pushToStack(&tStack, "int");
                 break;
             case FLOAT:
-                sprintf(result, "%f", (yyvsp[-2].ExpressionList)->value.f);
-                push(&stack_t, "float");
+                sprintf(resString, "%f", (yyvsp[-2].ExpressionList)->value.f);
+                pushToStack(&tStack, "float");
                 break;
             case RUNE:
-                sprintf(result, "%s", (yyvsp[-2].ExpressionList)->value.str);
-                push(&stack_t, "rune");
+                sprintf(resString, "%s", (yyvsp[-2].ExpressionList)->value.str);
+                pushToStack(&tStack, "rune");
                 break;
             case STRING:
-                sprintf(result, "%s", (yyvsp[-2].ExpressionList)->value.str);
-                push(&stack_t, "string");
+                sprintf(resString, "%s", (yyvsp[-2].ExpressionList)->value.str);
+                pushToStack(&tStack, "string");
                 break;
             case BOOL:
-                sprintf(result, "%dB", (yyvsp[-2].ExpressionList)->value.b);
-                push(&stack_t, "bool");
+                sprintf(resString, "%dB", (yyvsp[-2].ExpressionList)->value.b);
+                pushToStack(&tStack, "bool");
                 break;
             }        
-        push(&stack_v, result);
+        pushToStack(&vStack, resString);
     }
-#line 2377 "yac.tab.c"
+#line 2441 "yac.tab.c"
     break;
 
   case 56:
-#line 776 "yac.y"
+#line 843 "yac.y"
     {
         strcpy(value.op, (yyvsp[-1].LOGICAL_OR));
         (yyval.Expression) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
-        newtemp();
-        fprintf(icfile, "%s = %s %s %s\n", temp, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
-        strcpy((yyval.Expression)->loc, temp);
+        createTempVariable();
+        fprintf(intermediateCodeFile, "%s = %s %s %s\n", tempVariableStore, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
+        strcpy((yyval.Expression)->loc, tempVariableStore);
     }
-#line 2389 "yac.tab.c"
+#line 2453 "yac.tab.c"
     break;
 
   case 57:
-#line 784 "yac.y"
+#line 851 "yac.y"
     {
         strcpy(value.op, (yyvsp[-1].LOGICAL_AND));
         (yyval.Expression) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
-        newtemp();
-        fprintf(icfile, "%s = %s %s %s\n", temp, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
-        strcpy((yyval.Expression)->loc, temp);
+        createTempVariable();
+        fprintf(intermediateCodeFile, "%s = %s %s %s\n", tempVariableStore, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
+        strcpy((yyval.Expression)->loc, tempVariableStore);
     }
-#line 2401 "yac.tab.c"
+#line 2465 "yac.tab.c"
     break;
 
   case 58:
-#line 792 "yac.y"
+#line 859 "yac.y"
     {
         strcpy(value.op, (yyvsp[-1].RelationalOperation)->value.op);
         (yyval.Expression) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
-        newtemp();
-        fprintf(icfile, "%s = %s %s %s\n", temp, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
-        strcpy((yyval.Expression)->loc, temp);
-        printf("While setting: %s\n", (yyval.Expression)->loc);
+        createTempVariable();
+        fprintf(intermediateCodeFile, "%s = %s %s %s\n", tempVariableStore, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
+        strcpy((yyval.Expression)->loc, tempVariableStore);
+        // printf("While setting: %s\n", $$->loc);
     }
-#line 2414 "yac.tab.c"
+#line 2478 "yac.tab.c"
     break;
 
   case 59:
-#line 801 "yac.y"
+#line 868 "yac.y"
     {
 		 strcpy(value.op, (yyvsp[-1].AddOperation)->value.op);
 		 (yyval.Expression) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
-		 newtemp();
-		 fprintf(icfile, "%s = %s %s %s\n", temp, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
-		 strcpy((yyval.Expression)->loc, temp);
+		 createTempVariable();
+		 fprintf(intermediateCodeFile, "%s = %s %s %s\n", tempVariableStore, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
+		 strcpy((yyval.Expression)->loc, tempVariableStore);
     }
-#line 2426 "yac.tab.c"
+#line 2490 "yac.tab.c"
     break;
 
   case 60:
-#line 809 "yac.y"
+#line 876 "yac.y"
     {
 		 strcpy(value.op, (yyvsp[-1].MultipyOperation)->value.op);
 		 (yyval.Expression) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
-		 newtemp();
-		 fprintf(icfile, "%s = %s %s %s\n", temp, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
-		 strcpy((yyval.Expression)->loc, temp);
+		 createTempVariable();
+		 fprintf(intermediateCodeFile, "%s = %s %s %s\n", tempVariableStore, (yyvsp[-2].Expression)->loc, value.op, (yyvsp[0].Expression)->loc);
+		 strcpy((yyval.Expression)->loc, tempVariableStore);
     }
-#line 2438 "yac.tab.c"
+#line 2502 "yac.tab.c"
     break;
 
   case 61:
-#line 817 "yac.y"
+#line 884 "yac.y"
     {(yyval.Expression) = (yyvsp[0].UnaryExpression);}
-#line 2444 "yac.tab.c"
+#line 2508 "yac.tab.c"
     break;
 
   case 62:
-#line 822 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_EQUAL)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2450 "yac.tab.c"
-    break;
-
-  case 63:
-#line 824 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_NEQUAL)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2456 "yac.tab.c"
-    break;
-
-  case 64:
-#line 826 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_LT)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2462 "yac.tab.c"
-    break;
-
-  case 65:
-#line 828 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_LEQ)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2468 "yac.tab.c"
-    break;
-
-  case 66:
-#line 830 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_GT)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2474 "yac.tab.c"
-    break;
-
-  case 67:
-#line 832 "yac.y"
-    {strcpy(value.op, (yyvsp[0].REL_GEQ)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2480 "yac.tab.c"
-    break;
-
-  case 68:
-#line 837 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2486 "yac.tab.c"
-    break;
-
-  case 69:
-#line 839 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2492 "yac.tab.c"
-    break;
-
-  case 70:
-#line 841 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2498 "yac.tab.c"
-    break;
-
-  case 71:
-#line 843 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2504 "yac.tab.c"
-    break;
-
-  case 72:
-#line 848 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2510 "yac.tab.c"
-    break;
-
-  case 73:
-#line 850 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
+#line 889 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_EQUAL)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2516 "yac.tab.c"
     break;
 
-  case 74:
-#line 852 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2522 "yac.tab.c"
+  case 63:
+#line 893 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_NEQUAL)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2524 "yac.tab.c"
     break;
 
-  case 75:
-#line 854 "yac.y"
-    {strcpy(value.op, (yyvsp[0].LSHIFT)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2528 "yac.tab.c"
+  case 64:
+#line 897 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_LT)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2532 "yac.tab.c"
     break;
 
-  case 76:
-#line 856 "yac.y"
-    {strcpy(value.op, (yyvsp[0].RSHIFT)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2534 "yac.tab.c"
-    break;
-
-  case 77:
-#line 858 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
+  case 65:
+#line 901 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_LEQ)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2540 "yac.tab.c"
     break;
 
-  case 78:
-#line 860 "yac.y"
-    {strcpy(value.op, (yyvsp[0].AMPXOR)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2546 "yac.tab.c"
+  case 66:
+#line 905 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_GT)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2548 "yac.tab.c"
     break;
 
-  case 79:
-#line 866 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2552 "yac.tab.c"
+  case 67:
+#line 909 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].REL_GEQ)); (yyval.RelationalOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2556 "yac.tab.c"
     break;
 
-  case 80:
-#line 868 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2558 "yac.tab.c"
-    break;
-
-  case 81:
-#line 870 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
+  case 68:
+#line 916 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2564 "yac.tab.c"
     break;
 
-  case 82:
-#line 872 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2570 "yac.tab.c"
+  case 69:
+#line 920 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2572 "yac.tab.c"
     break;
 
-  case 83:
-#line 874 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2576 "yac.tab.c"
+  case 70:
+#line 924 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2580 "yac.tab.c"
     break;
 
-  case 84:
-#line 876 "yac.y"
-    {value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2582 "yac.tab.c"
-    break;
-
-  case 85:
-#line 881 "yac.y"
-    {strcpy(value.op, (yyvsp[0].ADD_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
+  case 71:
+#line 928 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.AddOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2588 "yac.tab.c"
     break;
 
-  case 86:
-#line 883 "yac.y"
-    {strcpy(value.op, (yyvsp[0].SUB_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2594 "yac.tab.c"
+  case 72:
+#line 935 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2596 "yac.tab.c"
     break;
 
-  case 87:
-#line 885 "yac.y"
-    {strcpy(value.op, (yyvsp[0].OR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2600 "yac.tab.c"
+  case 73:
+#line 939 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2604 "yac.tab.c"
     break;
 
-  case 88:
-#line 887 "yac.y"
-    {strcpy(value.op, (yyvsp[0].XOR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2606 "yac.tab.c"
-    break;
-
-  case 89:
-#line 889 "yac.y"
-    {strcpy(value.op, (yyvsp[0].MUL_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
+  case 74:
+#line 943 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2612 "yac.tab.c"
     break;
 
-  case 90:
-#line 891 "yac.y"
-    {strcpy(value.op, (yyvsp[0].DIV_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2618 "yac.tab.c"
+  case 75:
+#line 947 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].LSHIFT)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2620 "yac.tab.c"
     break;
 
-  case 91:
-#line 893 "yac.y"
-    {strcpy(value.op, (yyvsp[0].MOD_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2624 "yac.tab.c"
+  case 76:
+#line 951 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].RSHIFT)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2628 "yac.tab.c"
     break;
 
-  case 92:
-#line 895 "yac.y"
-    {strcpy(value.op, (yyvsp[0].AND_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2630 "yac.tab.c"
-    break;
-
-  case 93:
-#line 897 "yac.y"
-    {strcpy(value.op, (yyvsp[0].LSHIFT_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
+  case 77:
+#line 955 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
+    }
 #line 2636 "yac.tab.c"
     break;
 
-  case 94:
-#line 899 "yac.y"
-    {strcpy(value.op, (yyvsp[0].RSHIFT_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2642 "yac.tab.c"
-    break;
-
-  case 95:
-#line 901 "yac.y"
-    {strcpy(value.op, (yyvsp[0].AMPXOR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);}
-#line 2648 "yac.tab.c"
-    break;
-
-  case 96:
-#line 906 "yac.y"
-    {strcpy(value.op, (yyvsp[-1].CHANNEL_ASSIGN)); (yyval.UnaryExpression) = makeNode(OP, value, (yyvsp[0].UnaryExpression), NULL);}
-#line 2654 "yac.tab.c"
-    break;
-
-  case 97:
-#line 908 "yac.y"
+  case 78:
+#line 959 "yac.y"
     {
-        strcpy(value.op, (yyvsp[-1].UnaryOperation)->value.op);
-        (yyval.UnaryExpression) = makeNode(OP, value, (yyvsp[0].UnaryExpression), NULL);
-        strcpy((yyval.UnaryExpression)->loc,getLoc((yyvsp[0].UnaryExpression)));
-        newtemp();
-        fprintf(icfile, "%s = -%s\n", temp, (yyval.UnaryExpression)->loc);
-        strcpy((yyval.UnaryExpression)->loc, temp);
+        strcpy(value.op, (yyvsp[0].AMPXOR)); (yyval.MultipyOperation) = makeNode(OP, value, NULL, NULL);
     }
-#line 2667 "yac.tab.c"
+#line 2644 "yac.tab.c"
     break;
 
-  case 98:
-#line 917 "yac.y"
+  case 79:
+#line 967 "yac.y"
     {
-        (yyval.UnaryExpression) = (yyvsp[0].PrimaryExpression); 
-        strcpy((yyval.UnaryExpression)->loc,getLoc((yyvsp[0].PrimaryExpression)));
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2652 "yac.tab.c"
+    break;
+
+  case 80:
+#line 971 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2660 "yac.tab.c"
+    break;
+
+  case 81:
+#line 975 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2668 "yac.tab.c"
+    break;
+
+  case 82:
+#line 979 "yac.y"
+    {
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
     }
 #line 2676 "yac.tab.c"
     break;
 
-  case 99:
-#line 925 "yac.y"
+  case 83:
+#line 983 "yac.y"
     {
-        (yyval.PrimaryExpression) = (yyvsp[0].Operand);
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
     }
 #line 2684 "yac.tab.c"
     break;
 
-  case 102:
-#line 937 "yac.y"
+  case 84:
+#line 987 "yac.y"
     {
-        (yyval.Operand) = (yyvsp[0].Literal);
+        value.op[0] = *((int*)&yylval); value.op[1] = 0; (yyval.UnaryOperation) = makeNode(OP, value, NULL, NULL);
     }
 #line 2692 "yac.tab.c"
     break;
 
-  case 103:
-#line 941 "yac.y"
+  case 85:
+#line 994 "yac.y"
     {
-        (yyval.Operand) = (yyvsp[0].OperandName);
+        strcpy(value.op, (yyvsp[0].ADD_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
     }
 #line 2700 "yac.tab.c"
     break;
 
-  case 104:
-#line 945 "yac.y"
+  case 86:
+#line 998 "yac.y"
     {
-        (yyval.Operand) = (yyvsp[-1].Expression);
+        strcpy(value.op, (yyvsp[0].SUB_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
     }
 #line 2708 "yac.tab.c"
     break;
 
+  case 87:
+#line 1002 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].OR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2716 "yac.tab.c"
+    break;
+
+  case 88:
+#line 1006 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].XOR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2724 "yac.tab.c"
+    break;
+
+  case 89:
+#line 1010 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].MUL_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2732 "yac.tab.c"
+    break;
+
+  case 90:
+#line 1014 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].DIV_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2740 "yac.tab.c"
+    break;
+
+  case 91:
+#line 1018 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].MOD_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2748 "yac.tab.c"
+    break;
+
+  case 92:
+#line 1022 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].AND_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2756 "yac.tab.c"
+    break;
+
+  case 93:
+#line 1026 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].LSHIFT_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2764 "yac.tab.c"
+    break;
+
+  case 94:
+#line 1030 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].RSHIFT_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2772 "yac.tab.c"
+    break;
+
+  case 95:
+#line 1034 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[0].AMPXOR_ASSIGN)); (yyval.AssignOperation) = makeNode(OP, value, NULL, NULL);
+    }
+#line 2780 "yac.tab.c"
+    break;
+
+  case 96:
+#line 1041 "yac.y"
+    {strcpy(value.op, (yyvsp[-1].CHANNEL_ASSIGN)); (yyval.UnaryExpression) = makeNode(OP, value, (yyvsp[0].UnaryExpression), NULL);}
+#line 2786 "yac.tab.c"
+    break;
+
+  case 97:
+#line 1043 "yac.y"
+    {
+        strcpy(value.op, (yyvsp[-1].UnaryOperation)->value.op);
+        (yyval.UnaryExpression) = makeNode(OP, value, (yyvsp[0].UnaryExpression), NULL);
+        strcpy((yyval.UnaryExpression)->loc,getLoc((yyvsp[0].UnaryExpression)));
+        createTempVariable();
+        fprintf(intermediateCodeFile, "%s = -%s\n", tempVariableStore, (yyval.UnaryExpression)->loc);
+        strcpy((yyval.UnaryExpression)->loc, tempVariableStore);
+    }
+#line 2799 "yac.tab.c"
+    break;
+
+  case 98:
+#line 1052 "yac.y"
+    {
+        (yyval.UnaryExpression) = (yyvsp[0].PrimaryExpression); 
+        strcpy((yyval.UnaryExpression)->loc,getLoc((yyvsp[0].PrimaryExpression)));
+    }
+#line 2808 "yac.tab.c"
+    break;
+
+  case 99:
+#line 1060 "yac.y"
+    {
+        (yyval.PrimaryExpression) = (yyvsp[0].Operand);
+    }
+#line 2816 "yac.tab.c"
+    break;
+
+  case 102:
+#line 1072 "yac.y"
+    {
+        (yyval.Operand) = (yyvsp[0].Literal);
+    }
+#line 2824 "yac.tab.c"
+    break;
+
+  case 103:
+#line 1076 "yac.y"
+    {
+        (yyval.Operand) = (yyvsp[0].OperandName);
+    }
+#line 2832 "yac.tab.c"
+    break;
+
+  case 104:
+#line 1080 "yac.y"
+    {
+        (yyval.Operand) = (yyvsp[-1].Expression);
+    }
+#line 2840 "yac.tab.c"
+    break;
+
   case 105:
-#line 949 "yac.y"
+#line 1084 "yac.y"
     {value.n = NULL; (yyval.Operand) = makeNode(NIL, value, NULL, NULL);}
-#line 2714 "yac.tab.c"
+#line 2846 "yac.tab.c"
     break;
 
   case 106:
-#line 951 "yac.y"
+#line 1086 "yac.y"
     {value.b = strcmp((yyvsp[0].P_BOOL), "true")==0 ? 1 : 0; (yyval.Operand) = makeNode(BOOL, value, NULL, NULL);}
-#line 2720 "yac.tab.c"
+#line 2852 "yac.tab.c"
     break;
 
   case 107:
-#line 956 "yac.y"
+#line 1091 "yac.y"
     {
         (yyval.Literal) = (yyvsp[0].BasicLiteral);
     }
-#line 2728 "yac.tab.c"
+#line 2860 "yac.tab.c"
     break;
 
   case 108:
-#line 963 "yac.y"
+#line 1098 "yac.y"
     {
         value.i = (yyvsp[0].INT_LITERAL); (yyval.BasicLiteral) = makeNode(INT, value, NULL, NULL);
     }
-#line 2736 "yac.tab.c"
+#line 2868 "yac.tab.c"
     break;
 
   case 109:
-#line 967 "yac.y"
+#line 1102 "yac.y"
     {
         value.f = (yyvsp[0].FLOAT_LITERAL); (yyval.BasicLiteral) = makeNode(FLOAT, value, NULL, NULL);
     }
-#line 2744 "yac.tab.c"
+#line 2876 "yac.tab.c"
     break;
 
   case 110:
-#line 971 "yac.y"
+#line 1106 "yac.y"
     {
         strcpy(value.str, (yyvsp[0].STRING_LITERAL)); (yyval.BasicLiteral) = makeNode(STRING, value, NULL, NULL);
     }
-#line 2752 "yac.tab.c"
+#line 2884 "yac.tab.c"
     break;
 
   case 111:
-#line 978 "yac.y"
+#line 1113 "yac.y"
     {
         strcpy(value.name, (yyvsp[0].IDENTIFIER)); (yyval.OperandName) = makeNode(ID, value, NULL, NULL);
     }
-#line 2760 "yac.tab.c"
+#line 2892 "yac.tab.c"
     break;
 
   case 112:
-#line 982 "yac.y"
+#line 1117 "yac.y"
     {
         strcpy(value.name, (yyvsp[0].P_FUNCTION)); (yyval.OperandName) = makeNode(FUNC, value, NULL, NULL);
     }
-#line 2768 "yac.tab.c"
+#line 2900 "yac.tab.c"
     break;
 
   case 113:
-#line 986 "yac.y"
+#line 1121 "yac.y"
     {
         (yyval.OperandName) = (yyvsp[0].QualifiedID);
     }
-#line 2776 "yac.tab.c"
+#line 2908 "yac.tab.c"
     break;
 
   case 114:
-#line 996 "yac.y"
+#line 1131 "yac.y"
     {
         ++scope_depth; 
-        scope_id = next_id(scope_depth);
+        scope_id = getNextScope(scope_depth);
     }
-#line 2785 "yac.tab.c"
+#line 2917 "yac.tab.c"
     break;
 
   case 115:
-#line 1001 "yac.y"
+#line 1136 "yac.y"
     {
         --scope_depth; 
-        scope_id = restore_id(scope_depth);
+        scope_id = getPreviousScope(scope_depth);
     }
-#line 2794 "yac.tab.c"
+#line 2926 "yac.tab.c"
     break;
 
   case 127:
-#line 1029 "yac.y"
+#line 1164 "yac.y"
     {
-        newtemp(); fprintf(icfile, "%s = %s + 1\n", temp, (yyvsp[-1].Expression)->loc), fprintf(icfile, "%s = %s\n", (yyvsp[-1].Expression)->loc, temp);
+        createTempVariable(); fprintf(intermediateCodeFile, "%s = %s + 1\n", tempVariableStore, (yyvsp[-1].Expression)->loc), fprintf(intermediateCodeFile, "%s = %s\n", (yyvsp[-1].Expression)->loc, tempVariableStore);
     }
-#line 2802 "yac.tab.c"
+#line 2934 "yac.tab.c"
     break;
 
   case 128:
-#line 1033 "yac.y"
+#line 1168 "yac.y"
     {
-        newtemp(); fprintf(icfile, "%s = %s - 1\n", temp, (yyvsp[-1].Expression)->loc), fprintf(icfile, "%s = %s\n", (yyvsp[-1].Expression)->loc, temp);
+        createTempVariable(); fprintf(intermediateCodeFile, "%s = %s - 1\n", tempVariableStore, (yyvsp[-1].Expression)->loc), fprintf(intermediateCodeFile, "%s = %s\n", (yyvsp[-1].Expression)->loc, tempVariableStore);
     }
-#line 2810 "yac.tab.c"
+#line 2942 "yac.tab.c"
     break;
 
   case 129:
-#line 1040 "yac.y"
+#line 1175 "yac.y"
     {
         value.op[0] = '='; 
         value.op[1] = 0; 
         (yyval.Assignment) = makeNode(OP, value, (yyvsp[-2].IdentifierList), (yyvsp[0].ExpressionList));
-        doAssignExisting((yyvsp[-2].IdentifierList), (yyvsp[0].ExpressionList));
+        PresentIdentifierAssignment((yyvsp[-2].IdentifierList), (yyvsp[0].ExpressionList));
     }
-#line 2821 "yac.tab.c"
+#line 2953 "yac.tab.c"
     break;
 
   case 130:
-#line 1047 "yac.y"
+#line 1182 "yac.y"
     {	
         strcpy(value.op, (yyvsp[-1].AssignOperation)->value.op); 
         (yyval.Assignment) = makeNode(OP, value, (yyvsp[-2].Expression), (yyvsp[0].Expression));
     }
-#line 2830 "yac.tab.c"
+#line 2962 "yac.tab.c"
     break;
 
   case 131:
-#line 1055 "yac.y"
+#line 1190 "yac.y"
     {
-        doAssign('v', (yyvsp[-2].IdentifierList), (yyvsp[0].ExpressionList));
+        IdentifierAssignment('v', (yyvsp[-2].IdentifierList), (yyvsp[0].ExpressionList));
     }
-#line 2838 "yac.tab.c"
+#line 2970 "yac.tab.c"
     break;
 
   case 132:
-#line 1064 "yac.y"
+#line 1199 "yac.y"
     {
-        newlabel(); add(&for_loc, label); newlabel(); add(&for_loc, label); 
-        strcpy((*(IfNode*)(&yyval)).next, label);
+        createLabel(); insertToQueue(&forLoopQueue, labelStore); createLabel(); insertToQueue(&forLoopQueue, labelStore); 
+        strcpy((*(IfNode*)(&yyval)).next, labelStore);
     }
-#line 2847 "yac.tab.c"
+#line 2979 "yac.tab.c"
     break;
 
   case 133:
-#line 1069 "yac.y"
+#line 1204 "yac.y"
     {
-        strcpy((*(IfNode*)(&yyval)).next, label);
+        strcpy((*(IfNode*)(&yyval)).next, labelStore);
     }
-#line 2855 "yac.tab.c"
+#line 2987 "yac.tab.c"
     break;
 
   case 134:
-#line 1073 "yac.y"
+#line 1208 "yac.y"
     {
-        fprintf(icfile, "GOTO %s\n", label);
-        fprintf(icfile, "%s:\n", (*(IfNode*)(&yyvsp[-3])).next);
+        fprintf(intermediateCodeFile, "GOTO %s\n", labelStore);
+        fprintf(intermediateCodeFile, "%s:\n", (*(IfNode*)(&yyvsp[-3])).next);
     }
-#line 2864 "yac.tab.c"
+#line 2996 "yac.tab.c"
     break;
 
   case 139:
-#line 1088 "yac.y"
+#line 1223 "yac.y"
     {
-        fprintf(icfile, "IFFALSE %s GOTO %s\n", (yyvsp[0].Expression)->loc, rem(&for_loc));
+        fprintf(intermediateCodeFile, "IFFALSE %s GOTO %s\n", (yyvsp[0].Expression)->loc, removeFromQueue(&forLoopQueue));
     }
-#line 2872 "yac.tab.c"
+#line 3004 "yac.tab.c"
     break;
 
   case 140:
-#line 1095 "yac.y"
-    {strcpy((*(IfNode*)(&yyval)).next, rem(&for_loc)); fprintf(icfile, "%s:\n", (*(IfNode*)(&yyval)).next); }
-#line 2878 "yac.tab.c"
+#line 1230 "yac.y"
+    {strcpy((*(IfNode*)(&yyval)).next, removeFromQueue(&forLoopQueue)); fprintf(intermediateCodeFile, "%s:\n", (*(IfNode*)(&yyval)).next); }
+#line 3010 "yac.tab.c"
     break;
 
   case 141:
-#line 1098 "yac.y"
-    {newlabel();fprintf(icfile, "GOTO %s\n", label); add(&for_loc, label);}
-#line 2884 "yac.tab.c"
+#line 1233 "yac.y"
+    {createLabel();fprintf(intermediateCodeFile, "GOTO %s\n", labelStore); insertToQueue(&forLoopQueue, labelStore);}
+#line 3016 "yac.tab.c"
     break;
 
   case 142:
-#line 1100 "yac.y"
-    {newlabel(); fprintf(icfile, "%s:\n", label);}
-#line 2890 "yac.tab.c"
+#line 1235 "yac.y"
+    {createLabel(); fprintf(intermediateCodeFile, "%s:\n", labelStore);}
+#line 3022 "yac.tab.c"
     break;
 
   case 143:
-#line 1102 "yac.y"
+#line 1237 "yac.y"
     {
-        fprintf(icfile, "GOTO %s\n", (*(IfNode*)(&yyvsp[-6])).next); 
-        fprintf(icfile, "%s:\n", rem(&for_loc));
+        fprintf(intermediateCodeFile, "GOTO %s\n", (*(IfNode*)(&yyvsp[-6])).next); 
+        fprintf(intermediateCodeFile, "%s:\n", removeFromQueue(&forLoopQueue));
     }
-#line 2899 "yac.tab.c"
+#line 3031 "yac.tab.c"
     break;
 
   case 160:
-#line 1157 "yac.y"
+#line 1292 "yac.y"
     {
-        newlabel();
-        newtemp();
-        fprintf(icfile, "%s = i == %s\n", temp, (yyvsp[0].Expression)->loc);
-        fprintf(icfile, "IFFALSE %s GOTO %s\n", temp, label);
-        strcpy((*(IfNode*)(&yyval)).next, label);
+        createLabel();
+        createTempVariable();
+        fprintf(intermediateCodeFile, "%s = i == %s\n", tempVariableStore, (yyvsp[0].Expression)->loc);
+        fprintf(intermediateCodeFile, "IFFALSE %s GOTO %s\n", tempVariableStore, labelStore);
+        strcpy((*(IfNode*)(&yyval)).next, labelStore);
     }
-#line 2911 "yac.tab.c"
+#line 3043 "yac.tab.c"
     break;
 
   case 161:
-#line 1166 "yac.y"
+#line 1301 "yac.y"
     { 
-        push(&if_cond, (yyvsp[-3].Expression)->loc); 
-        fprintf(icfile, "%s:\n", (*(IfNode*)(&yyvsp[-2])).next); 
+        pushToStack(&switchConditionStack, (yyvsp[-3].Expression)->loc); 
+        fprintf(intermediateCodeFile, "%s:\n", (*(IfNode*)(&yyvsp[-2])).next); 
     }
-#line 2920 "yac.tab.c"
+#line 3052 "yac.tab.c"
     break;
 
 
-#line 2924 "yac.tab.c"
+#line 3056 "yac.tab.c"
 
       default: break;
     }
@@ -3152,34 +3284,34 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1220 "yac.y"
+#line 1349 "yac.y"
 
 
 extern int yylineno;
 char codeline[100];
-void yyerror(char const* error) {
-	fprintf(stderr, "Syntax error in line %d: %s\n", yylineno, error);
+void yyerror(char const* ErrorMessage) 
+{
+	fprintf(stderr, "Syntax ErrorMessage in line %d: %s\n", yylineno, ErrorMessage);
 }
 
 int main()
 {
-	icfile = fopen("code optimization/intermediate.txt", "w");
-	for(int i=0; i<TABLE_SIZE; i++)
-		hashTable[i].hcode = -1;
+	intermediateCodeFile = fopen("code optimization/icg_igo.txt", "w");
+	for(int i=0; i<SYMBOL_TABLE_MAX; i++)
+	{
+        hashTable[i].hcode = -1;
+    }
 
-	sprintf(result, "%d", base);
+	sprintf(resString, "%d", base);
 	base++;
-	push(&stack_scope, result);
-
+	pushToStack(&scopeStack, resString);
 	yydebug = 1;
-	if ( yyparse() != 0){
+	if( yyparse() != 0)
+    {
 		printf("Build Failed\n\n");
 		exit(1);
 	}
-
-	printf("\n\n\n");
-	printf("---------------------------------Symbol Table---------------------------------\n\n");
-	disp_symtbl();
-
+	printf("\n\nSymbol-Table\n\n");
+	displaySymbolTable();
 	return 0;
 }

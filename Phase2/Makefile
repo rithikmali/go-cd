@@ -1,5 +1,5 @@
-all: lex.yy.c yac.tab.c common.c common.h
-	gcc yac.tab.c lex.yy.c common.c -lfl -o parser
+all: lex.yy.c yac.tab.c server.c server.h
+	gcc yac.tab.c lex.yy.c server.c -lfl -o compiler
 
 yac.tab.c: yac.y
 	bison -d --debug yac.y

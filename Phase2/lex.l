@@ -1,7 +1,7 @@
 %{
 #include "yac.tab.h"
 #include <string.h>
-#include "common.h"
+#include "server.h"
 // void yyerror (char *s);
 // int yylex();
 %}
@@ -9,27 +9,27 @@
 Zero_Nine [0-9]
 a_to_Z [a-zA-Z_]
 
-whitespace [[:space:]]+
+All_Space [[:space:]]+
 
-decimal_digits {Zero_Nine}(_?{Zero_Nine})*
+Digitss {Zero_Nine}(_?{Zero_Nine})*
 
-decimal_exponent  [eE][+-]?{decimal_digits}
-float_literal ({decimal_digits}"."{decimal_digits}?{decimal_exponent}?)|{decimal_digits}{decimal_exponent}
+Exponent  [eE][+-]?{Digitss}
+Floats ({Digitss}"."{Digitss}?{Exponent}?)|{Digitss}{Exponent}
 
-int_literal 0|([1-9]{Zero_Nine}*)
-identifier {a_to_Z}({a_to_Z}|{decimal_digits})*
-operator_char "+"|"&"|"("|")"|"-"|"|"|"["|"]"|"^"|":"|"."|"{"|"}"|"/"|"*"|"="|","|";"|"%"|"!"
-predeclared_type (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
-predeclared_functions (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)
+Integers 0|([1-9]{Zero_Nine}*)
+Variable_Names {a_to_Z}({a_to_Z}|{Digitss})*
+Operators "+"|"&"|"("|")"|"-"|"|"|"["|"]"|"^"|":"|"."|"{"|"}"|"/"|"*"|"="|","|";"|"%"|"!"
+Types_Pre (bool)|(byte)|(complex64)|(complex128)|(error)|(float32)|(float64)|(int)|(int8)|(int16)|(int32)|(int64)|(rune)|(string)|(uint)|(uint8)|(uint16)|(uint32)|(uint64)|(uintptr)
+Funcs_Pre (append)|(cap)|(close)|(complex)|(copy)|(delete)|(imag)|(len)|(make)|(new)|(panic)|(print)|(println)|(real)|(recover)
 
-line_comment  "//".*
-block_comment "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/" 
-comment       {line_comment}|{block_comment}
+Single_Line_Com  "//".*
+Multi_Line_Com "/*"[^*]*"*"+([^*/][^*]*"*"+)*"/" 
+All_Com       {Single_Line_Com}|{Multi_Line_Com}
 
 %%
-{whitespace} ;
-{comment} ;
-{operator_char}         {*((char*)&yylval) = yytext[0]; return yytext[0];}
+{All_Space} ;
+{All_Com} ;
+{Operators}         {*((char*)&yylval) = yytext[0]; return yytext[0];}
 "nil"          return P_NIL;
 "true"|"false" return P_BOOL;
 
@@ -90,12 +90,10 @@ comment       {line_comment}|{block_comment}
 "if"        ;
 "continue"  ;
 
-{predeclared_type}      {yylval.P_TYPE = strdup(yytext); return P_TYPE;}
-{predeclared_functions} {yylval.P_FUNCTION = strdup(yytext); return P_FUNCTION;}
-{identifier}            {yylval.IDENTIFIER = strdup(yytext);printf("IDENTIFIER"); return IDENTIFIER;}  
+{Types_Pre}      {yylval.P_TYPE = strdup(yytext); return P_TYPE;}
+{Funcs_Pre} {yylval.P_FUNCTION = strdup(yytext); return P_FUNCTION;}
+{Variable_Names}            {yylval.IDENTIFIER = strdup(yytext);printf("IDENTIFIER"); return IDENTIFIER;}  
 \".*\"                  {yylval.STRING_LITERAL = strdup(yytext); printf("STRING_LITERAL: %s",yytext);return STRING_LITERAL;}
-{int_literal}           {yylval.INT_LITERAL = atoi(yytext); printf("INT_LITERAL: %s",yytext);return INT_LITERAL;}
-{float_literal}         {yylval.FLOAT_LITERAL = atof(yytext); printf("FLOAT_LITERAL: %s",yytext); return FLOAT_LITERAL;}
-
-
+{Integers}           {yylval.INT_LITERAL = atoi(yytext); printf("INT_LITERAL: %s",yytext);return INT_LITERAL;}
+{Floats}         {yylval.FLOAT_LITERAL = atof(yytext); printf("FLOAT_LITERAL: %s",yytext); return FLOAT_LITERAL;}
 %%

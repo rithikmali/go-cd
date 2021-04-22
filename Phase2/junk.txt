@@ -1,0 +1,67 @@
+%token <char const *> STRING_LITERAL
+%token <int> INT_LITERAL
+%token <double> FLOAT_LITERAL
+%token <char const *> IDENTIFIER
+
+%token KEYWORD_BREAK
+%token KEYWORD_DEFAULT
+%token KEYWORD_FUNC
+%token KEYWORD_INTERFACE
+%token KEYWORD_SELECT
+%token KEYWORD_CASE
+%token KEYWORD_DEFER
+%token KEYWORD_GO
+%token KEYWORD_MAP
+%token KEYWORD_STRUCT
+%token KEYWORD_CHAN
+%token KEYWORD_ELSE
+%token KEYWORD_GOTO
+%token KEYWORD_PACKAGE
+%token KEYWORD_SWITCH
+%token KEYWORD_CONST
+%token KEYWORD_FALLTHROUGH
+%token KEYWORD_IF
+%token KEYWORD_RANGE
+%token KEYWORD_TYPE
+%token KEYWORD_CONTINUE
+%token KEYWORD_FOR
+%token KEYWORD_IMPORT
+%token KEYWORD_RETURN
+%token KEYWORD_VAR
+
+%token <char const *> LOGICAL_OR
+%token <char const *> LOGICAL_AND
+
+%token <char const *> LSHIFT
+%token <char const *> RSHIFT
+%token <char const *> AMPXOR
+
+%token <char const *> CHANNEL_ASSIGN
+
+%token <char const *> REL_EQUAL
+%token <char const *> REL_NEQUAL
+%token <char const *> REL_LT
+%token <char const *> REL_LEQ
+%token <char const *> REL_GT
+%token <char const *> REL_GEQ
+
+%token <char const *> ADD_ASSIGN
+%token <char const *> SUB_ASSIGN
+%token <char const *> OR_ASSIGN
+%token <char const *> XOR_ASSIGN
+%token <char const *> MUL_ASSIGN
+%token <char const *> DIV_ASSIGN
+%token <char const *> MOD_ASSIGN
+%token <char const *> AND_ASSIGN
+%token <char const *> LSHIFT_ASSIGN
+%token <char const *> RSHIFT_ASSIGN
+%token <char const *> AMPXOR_ASSIGN
+%token <char const *> INC_ASSIGN
+%token <char const *> DEC_ASSIGN
+
+%token <char const *> SHORT_DECLARATION
+
+%token <char const *> P_BOOL
+%token P_NIL
+%token <char const *> P_TYPE
+%token <char const *> P_FUNCTION
