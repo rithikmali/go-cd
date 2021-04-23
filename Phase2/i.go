@@ -19,28 +19,31 @@ import "fmt"
 func main() {
     maya:="Aravind"
     maya="Hello"
-    var a,b, c int = 1,10, 1
-	b=5+10*20/100
+    var a,b, pqr int = 1,10, 1
+	b=30*2/92+10
+    b=20
 	aravind:=100
 	aravind=20
-    for c=1;c<10;c++ {
+    for pqr=1;pqr<10;pqr++
+    {
 		a = 4 + 1
-		c=3+1
+		pqr=3+1
 	}
     i:=2
-    cas:=2
-    switch i {
+    cas:="Cas0"
+    switch i
+    {
     case 1:
-        cas=1
+        cas="Cas1"
     case 2:
-        cas=2
+        cas="Cas2"
     case 3:
-        cas=3
-    case 4+3:
-        cas=4
+        cas="Cas3"
+    case 4:
+        cas="Cas4"
     case 5:
-        cas=5
+        cas="Cas5"
     case 6:
-        cas=6
+        cas="Cas6"
     }
 }

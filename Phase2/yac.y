@@ -17,11 +17,11 @@ int scope_id = 0;
 struct symbolTableStructure {
   char name[31];
   char declaredVariableType[10];
-  char type;
+  char type[10];
   char value[20];
   int scope_depth;
-  int scope_id;
   int hcode;
+  int scope_id;
 };
 
 struct symbolTableStructure hashTable[1000];
@@ -131,7 +131,7 @@ int hashTableIndexReturn(char *inputToHash)
     }
 }
 
-void appendHashTable(char type, char *inputToHash, char *declaredVariableType, char *value, int scope_depth, int scope_id) 
+void appendHashTable(char* type, char *inputToHash, char *declaredVariableType, char *value, int scope_depth, int scope_id) 
 {
     if(hashTableIndexReturn(inputToHash) != -1)
     {
@@ -154,7 +154,7 @@ void appendHashTable(char type, char *inputToHash, char *declaredVariableType, c
                 strcpy(hashTable[newIndex].value, value);
                 hashTable[newIndex].scope_depth = scope_depth;
                 hashTable[newIndex].scope_id = scope_id;
-                hashTable[newIndex].type = type;
+                strcpy(hashTable[newIndex].type, type);
                 hashTable[newIndex].hcode = 1;
                 break;
             }
@@ -168,7 +168,7 @@ void appendHashTable(char type, char *inputToHash, char *declaredVariableType, c
         strcpy(hashTable[hashIndex223].value, value);
         hashTable[hashIndex223].scope_depth = scope_depth;
         hashTable[hashIndex223].scope_id = scope_id;
-        hashTable[hashIndex223].type = type;
+        strcpy(hashTable[hashIndex223].type, type);
         hashTable[hashIndex223].hcode = 1;
     }
 }
@@ -202,7 +202,7 @@ void updateHashTable(char *inputToHash, char *declaredVariableType, char *value)
         exit(1);
     }
 
-    if(hashTable[hashIndex223].type == 'c') 
+    if(strcmp(hashTable[hashIndex223].type, "Const")==0) 
     {
         char ErrorMessage[100];
         sprintf(ErrorMessage, "Connot Assign to %s it is a Constant Variable", inputToHash);
@@ -297,7 +297,7 @@ void PresentIdentifierAssignment(Node *LeftHandSide, Node *RightHandSide)
 	PresentIdentifierAssignment(LeftHandSide->rop, RightHandSide->rop);
 }
 
-void IdentifierAssignment(char declaredType, Node *LeftHandSide, Node *RightHandSide)
+void IdentifierAssignment(char* declaredType, Node *LeftHandSide, Node *RightHandSide)
 {
 	if(LeftHandSide==NULL && RightHandSide==NULL)
     {
@@ -395,13 +395,13 @@ void createLabel()
 
 void displaySymbolTable()
 {
-    printf("%s\t|\t%s\t|\t%s\t|\t%s\t|\t%s\t|\n", "Name", "Data Type", "Value","Scope Depth", "Scope ID");
+    printf("%s\t|\t%s\t|\t%s\t\t|\t%s\t|\t%s\t\t|\n\n","Type","Data Type", "Name", "Value","Scope");
     int base = 100;
     for(int i=0;i<SYMBOL_TABLE_MAX;i++) 
     {
         if(hashTable[i].hcode != -1)
         {
-            printf("%s\t|\t%s\t\t|\t%s\t|\t%d\t\t|\t%d\t\t|\n", hashTable[i].name, hashTable[i].declaredVariableType, hashTable[i].value, hashTable[i].scope_depth, hashTable[i].scope_id);
+            printf("%s\t|\t%s\t\t|\t%s\t\t|\t%s\t|\t%d\t\t|\n",hashTable[i].type ,hashTable[i].declaredVariableType,hashTable[i].name, hashTable[i].value, hashTable[i].scope_depth);
         }
     }
 }
@@ -503,7 +503,7 @@ void displaySymbolTable()
 s:
     PackageClause ImportDeclarations TopLevelDeclarations
     {
-        printf("Parsing Successful. The given Code is Valid\n"); 
+        printf("\n\n\nParsing Successful. The given Code is Valid\n"); 
         YYACCEPT;
     }
 ;
@@ -573,7 +573,7 @@ ConstDeclaration:
             {
                 while(!isStackEmpty(iStack))
                 {
-                    appendHashTable('c', popFromStack(&iStack), popFromStack(&tStack), "NULL", scope_depth, scope_id);
+                    appendHashTable("Const", popFromStack(&iStack), popFromStack(&tStack), "NULL", scope_depth, scope_id);
                 }
             }
             else 
@@ -581,7 +581,7 @@ ConstDeclaration:
                 while(!isStackEmpty(iStack)) 
                 {
 
-                    appendHashTable('c', popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
+                    appendHashTable("Const", popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
                 }
             }
         }  
@@ -598,7 +598,7 @@ ConstSpecification:
     { 
         value.op[0] = '='; value.op[1] = 0; 
         $$ = makeNode(OP, value, $1, $2);
-        IdentifierAssignment('c', $1, $2->value.n);
+        IdentifierAssignment("Const", $1, $2->value.n);
     }
 ;
 
@@ -664,14 +664,14 @@ VariableDeclaration:
             if(vStack.top == -1){
                 while(!isStackEmpty(iStack))
                 {
-                    appendHashTable('v', popFromStack(&iStack), tempArray, "NULL", scope_depth, scope_id);
+                    appendHashTable("Var", popFromStack(&iStack), tempArray, "NULL", scope_depth, scope_id);
                 }
             }
             else 
             {
                 while(!isStackEmpty(iStack))
                 {
-                    appendHashTable('v', popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
+                    appendHashTable("Var", popFromStack(&iStack), popFromStack(&tStack), popFromStack(&vStack), scope_depth, scope_id);
                 }
             }
         } 
@@ -691,11 +691,11 @@ VariableSpecification:
             value.op[0] = '='; value.op[1] = 0; 
             // printf("Outside function: %d %d\n", seqLen($1), seqLen($2->value.n));
             $$ = makeNode(OP, value, $1, $2);
-            IdentifierAssignment('v', $1, $2->value.n);
+            IdentifierAssignment("Var", $1, $2->value.n);
         } 
         else {
             $$ = NULL;
-            IdentifierAssignment('v', $1, $2);
+            IdentifierAssignment("Var", $1, $2);
             // printf("Done with assign\n");
         }
     }
@@ -1188,7 +1188,7 @@ Assignment:
 ShortDeclaration:
     IdentifierList SHORT_DECLARATION ExpressionList
     {
-        IdentifierAssignment('v', $1, $3);
+        IdentifierAssignment("Var", $1, $3);
     }
 ;
 
