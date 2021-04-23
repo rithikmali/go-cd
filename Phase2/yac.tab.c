@@ -173,13 +173,13 @@ char *removeFromQueue(queue *stackPointer)
 
 int firstHashFunction(char *inputToHash)
 {
-  int currValue = 0;
-  for (int i = 0; inputToHash[i] != '\0'; i++)
-  {
-    currValue=(currValue*128+inputToHash[i])%1000000000;
-  }
-  currValue = currValue % SYMBOL_TABLE_MAX;
-  return currValue;
+    int currValue = 0;
+    for (int i = 0; inputToHash[i] != '\0'; i++)
+    {
+        currValue=(currValue*128+inputToHash[i])%1000000000;
+    }
+    currValue = currValue % SYMBOL_TABLE_MAX;
+    return currValue;
 }
 
 int hashTableIndexReturn(char *inputToHash) 
@@ -267,8 +267,8 @@ void updateHashTable(char *inputToHash, char *declaredVariableType, char *value)
         char ErrorMessage[100];
         // printf("In here\n");
         sprintf(ErrorMessage, "%s Variable undefined", inputToHash);
-    yyerror(ErrorMessage);
-    exit(1);
+        yyerror(ErrorMessage);
+        exit(1);
     }
 
     if(hashTable[hashIndex223].type == 'c') 
@@ -3035,7 +3035,7 @@ yyreduce:
     {
         createLabel();
         createTempVariable();
-        fprintf(intermediateCodeFile, "%s = i == %s\n", tempVariableStore, (yyvsp[0].Expression)->loc);
+        fprintf(intermediateCodeFile, "%s = i != %s\n", tempVariableStore, (yyvsp[0].Expression)->loc);
         fprintf(intermediateCodeFile, "IFFALSE %s GOTO %s\n", tempVariableStore, labelStore);
         strcpy((*(IfNode*)(&yyval)).next, labelStore);
     }

@@ -17,6 +17,8 @@ package main
 import "fmt"
 
 func main() {
+    maya:="Aravind"
+    maya="Hello"
     var a,b, c int = 1,10, 1
 	b=5+10*20/100
 	aravind:=100

@@ -1,3 +1,5 @@
+maya = "Aravind"
+maya = "Hello"
 a = 1
 b = 10
 c = 1
@@ -25,28 +27,28 @@ GOTO L3
 L1:
 i = 2
 cas = 2
-_t7 = i == 1
+_t7 = i != 1
 IFFALSE _t7 GOTO L4
 cas = 1
 L4:
-_t8 = i == 2
+_t8 = i != 2
 IFFALSE _t8 GOTO L5
 cas = 2
 L5:
-_t9 = i == 3
+_t9 = i != 3
 IFFALSE _t9 GOTO L6
 cas = 3
 L6:
 _t10 = 4 + 3
-_t11 = i == _t10
+_t11 = i != _t10
 IFFALSE _t11 GOTO L7
 cas = 4
 L7:
-_t12 = i == 5
+_t12 = i != 5
 IFFALSE _t12 GOTO L8
 cas = 5
 L8:
-_t13 = i == 6
+_t13 = i != 6
 IFFALSE _t13 GOTO L9
 cas = 6
 L9:
