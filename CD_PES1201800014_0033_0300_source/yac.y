@@ -1357,7 +1357,7 @@ void yyerror(char const* ErrorMessage)
 
 int main()
 {
-	intermediateCodeFile = fopen("code optimization/icg_igo.txt", "w");
+	intermediateCodeFile = fopen("icg_igo.txt", "w");
 	for(int i=0; i<SYMBOL_TABLE_MAX; i++)
 	{
         hashTable[i].hcode = -1;
